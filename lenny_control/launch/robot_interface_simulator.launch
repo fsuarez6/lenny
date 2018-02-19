@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Controller joint names -->
+  <rosparam file="$(find motoman_sda10f_support)/config/joint_names_sda10f.yaml"
+            command="load" />
+
+  <!-- send robot urdf to param server -->
+  <include file="$(find lenny_gazebo)/launch/load_lenny_description.launch"/>
+
+  <!-- The ROS-Industrial robot simulator -->
+  <include file="$(find industrial_robot_simulator)/launch/robot_interface_simulator.launch"/>
+
+  <!-- TF -->
+  <node pkg="robot_state_publisher" type="state_publisher" name="state_publisher">
+    <param name="publish_frequency"  type="double" value="60" />
+  </node>
+
+</launch>

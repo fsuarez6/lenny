@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>lenny_gazebo</name>
+  <version>0.0.0</version>
+  <description>The lenny_gazebo package</description>
+
+  <author email="fsuarez6@gmail.com">Francisco Suarez-Ruiz</author>
+  <maintainer email="fsuarez6@gmail.com">Francisco Suarez-Ruiz</maintainer>
+  <license>BSD 3-Clause</license>
+  <url type="repository">https://github.com/fsuarez6/lenny</url>
+  <url type="bugtracker">https://github.com/fsuarez6/lenny/issues</url>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>gazebo_ros_control</exec_depend>
+  <exec_depend>lenny_control</exec_depend>
+  <exec_depend>motoman_sda10f_support</exec_depend>
+
+</package>

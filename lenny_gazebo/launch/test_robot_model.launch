@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+  <param name="use_gui" value="true" />
+
+  <!-- send robot urdf to param server -->
+	<include file="$(find lenny_gazebo)/launch/load_lenny_description.launch"/>
+
+	<node pkg="joint_state_publisher" type="joint_state_publisher"
+        name="joint_state_publisher"/>
+	<node pkg="robot_state_publisher" type="robot_state_publisher"
+        name="robot_state_publisher"/>
+	<node name="rviz" pkg="rviz" type="rviz" required="true"
+    args="-d $(find lenny_gazebo)/config/robot_state.rviz" />
+</launch>

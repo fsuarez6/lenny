@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: lenny_gazebo
+    relative_path: urdf/lenny.xacro
+  SRDF:
+    relative_path: config/lenny.srdf
+  CONFIG:
+    author_name: Francisco Suarez-Ruiz
+    author_email: fsuarez6@gmail.com
+    generated_timestamp: 1518324830

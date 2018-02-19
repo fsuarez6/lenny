@@ -1,0 +1,88 @@
+# Trajectory, position and state controllers
+joint_state_controller:
+  publish_rate: 150
+  type: joint_state_controller/JointStateController
+
+# Position controllers
+torso_joint_b1:
+  type: position_controllers/JointPositionController
+  joint: torso_joint_b1
+arm_left_joint_1_s:
+  type: position_controllers/JointPositionController
+  joint: arm_left_joint_1_s
+arm_left_joint_2_l:
+  type: position_controllers/JointPositionController
+  joint: arm_left_joint_2_l
+arm_left_joint_3_e:
+  type: position_controllers/JointPositionController
+  joint: arm_left_joint_3_e
+arm_left_joint_4_u:
+  type: position_controllers/JointPositionController
+  joint: arm_left_joint_4_u
+arm_left_joint_5_r:
+  type: position_controllers/JointPositionController
+  joint: arm_left_joint_5_r
+arm_left_joint_6_b:
+  type: position_controllers/JointPositionController
+  joint: arm_left_joint_6_b
+arm_left_joint_7_t:
+  type: position_controllers/JointPositionController
+  joint: arm_left_joint_7_t
+arm_right_joint_1_s:
+  type: position_controllers/JointPositionController
+  joint: arm_right_joint_1_s
+arm_right_joint_2_l:
+  type: position_controllers/JointPositionController
+  joint: arm_right_joint_2_l
+arm_right_joint_3_e:
+  type: position_controllers/JointPositionController
+  joint: arm_right_joint_3_e
+arm_right_joint_4_u:
+  type: position_controllers/JointPositionController
+  joint: arm_right_joint_4_u
+arm_right_joint_5_r:
+  type: position_controllers/JointPositionController
+  joint: arm_right_joint_5_r
+arm_right_joint_6_b:
+  type: position_controllers/JointPositionController
+  joint: arm_right_joint_6_b
+arm_right_joint_7_t:
+  type: position_controllers/JointPositionController
+  joint: arm_right_joint_7_t
+
+# Gripper controllers
+left_gripper_controller:
+  type: position_controllers/GripperActionController
+  joint: arm_left_robotiq_85_left_knuckle_joint
+  action_monitor_rate: 20
+  goal_tolerance: 0.002
+  max_effort: 100
+  stall_velocity_threshold: 0.001
+  stall_timeout: 1.0
+right_gripper_controller:
+  type: position_controllers/GripperActionController
+  joint: arm_right_robotiq_85_left_knuckle_joint
+  action_monitor_rate: 20
+  goal_tolerance: 0.002
+  max_effort: 100
+  stall_velocity_threshold: 0.001
+  stall_timeout: 1.0
+
+joint_trajectory_action:
+  type: "position_controllers/JointTrajectoryController"
+  joints:
+    - arm_left_joint_1_s
+    - arm_left_joint_2_l
+    - arm_left_joint_3_e
+    - arm_left_joint_4_u
+    - arm_left_joint_5_r
+    - arm_left_joint_6_b
+    - arm_left_joint_7_t
+    - arm_right_joint_1_s
+    - arm_right_joint_2_l
+    - arm_right_joint_3_e
+    - arm_right_joint_4_u
+    - arm_right_joint_5_r
+    - arm_right_joint_6_b
+    - arm_right_joint_7_t
+    - torso_joint_b1

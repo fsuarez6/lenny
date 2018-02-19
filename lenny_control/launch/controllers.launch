@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- launch file parameters -->
+  <arg name="debug"     default="false" />
+  <arg name="controllers" default=" joint_state_controller
+                                    joint_trajectory_action
+                                    left_gripper_controller
+                                    right_gripper_controller" />
+
+  <arg if="$(arg debug)"      name="OUTPUT" value="screen"/>
+  <arg unless="$(arg debug)"  name="OUTPUT" value="log"/>
+
+  <!-- Controllers -->
+  <rosparam file="$(find lenny_control)/config/controllers.yaml" command="load" />
+
+  <!-- Load configuration files -->
+  <node name="robot_controllers" pkg="controller_manager" type="spawner" output="$(arg OUTPUT)" args="$(arg controllers)"/>
+
+  <!-- TF -->
+  <node pkg="robot_state_publisher" type="state_publisher" name="state_publisher">
+    <param name="publish_frequency"  type="double" value="60" />
+  </node>
+</launch>

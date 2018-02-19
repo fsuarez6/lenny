@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- launch file parameters -->
+  <arg name="paused"      default="false"/>
+  <arg name="debug"       default="false"/>
+  <arg name="gui"         default="true"/>
+  <arg name="rate"        default="125" />
+
+  <!-- startup simulated world -->
+  <include file="$(find lenny_gazebo)/launch/robot_simulator.launch">
+    <arg name="world_name"  value="$(find lenny_gazebo)/worlds/cubes_task.world"/>
+    <arg name="paused"      value="$(arg paused)"/>
+    <arg name="debug"       value="$(arg debug)"/>
+    <arg name="gui"         value="$(arg gui)"/>
+  </include>
+
+</launch>
