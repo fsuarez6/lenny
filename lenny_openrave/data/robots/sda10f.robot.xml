@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="sda10f">
+  <!-- Torso -->
+  <kinbody prefix="torso_">
+    <!-- Links -->
+    <body name="base_link">
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_base.stl</render>
+        <collision>meshes/sda10f/collision/motoman_base.stl</collision>
+        <diffusecolor>0 0 1</diffusecolor>
+      </geom>
+    </body>
+    <body name="link_b1">
+      <offsetfrom>base_link</offsetfrom>
+      <translation>0.09257 0 0.8835</translation>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_b1.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_b1.stl</collision>
+        <diffusecolor>0.8 0.8 0.8</diffusecolor>
+      </geom>
+    </body>
+    <!-- Joints -->
+    <joint name="joint_b1" type="hinge">
+      <body>base_link</body>
+      <body>link_b1</body>
+      <offsetfrom>link_b1</offsetfrom>
+      <axis>0 0 1</axis>
+      <limits>-2.9570 2.9570</limits>
+      <maxvel>2.26</maxvel>
+      <maxtorque>100</maxtorque>
+    </joint>
+  </kinbody>
+  <!-- Left arm -->
+  <kinbody prefix="arm_left_">
+    <body name="link_1_s">
+      <offsetfrom>torso_link_b1</offsetfrom>
+      <translation>0.09996 0.0275 0.32214</translation>
+      <rotationaxis>1 0 0 90</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_s.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_s.stl</collision>
+        <diffusecolor>0 0 1</diffusecolor>
+      </geom>
+    </body>
+    <body name="link_2_l">
+      <offsetfrom>link_1_s</offsetfrom>
+      <translation>0 0.0577 -0.2255</translation>
+      <rotationaxis>1 0 0 -90</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_l.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_l.stl</collision>
+        <diffusecolor>0.8 0.8 0.8</diffusecolor>
+      </geom>
+    </body>
+    <body name="link_3_e">
+      <offsetfrom>link_2_l</offsetfrom>
+      <translation>0 0.1690 -0.0454</translation>
+      <rotationaxis>1 0 0 90</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_e.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_e.stl</collision>
+        <diffusecolor>0 0 1</diffusecolor>
+      </geom>
+    </body>
+    <body name="link_4_u">
+      <offsetfrom>link_3_e</offsetfrom>
+      <translation>0 -0.0085 -0.181</translation>
+      <rotationaxis>1 0 0 -90</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_u.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_u.stl</collision>
+        <diffusecolor>0.8 0.8 0.8</diffusecolor>
+      </geom>
+    </body>
+    <body name="link_5_r">
+      <offsetfrom>link_4_u</offsetfrom>
+      <translation>0 0.1936 0.0155</translation>
+      <rotationaxis>1 0 0 90</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_r.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_r.stl</collision>
+        <diffusecolor>0 0 1</diffusecolor>
+      </geom>
+    </body>
+    <body name="link_6_b">
+      <offsetfrom>link_5_r</offsetfrom>
+      <translation>0 0.0080 -0.155</translation>
+      <rotationaxis>1 0 0 -90</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_b.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_b.stl</collision>
+        <diffusecolor>0.8 0.8 0.8</diffusecolor>
+      </geom>
+    </body>
+    <body name="link_7_t">
+      <offsetfrom>link_6_b</offsetfrom>
+      <translation>0 0.168 -0.015</translation>
+      <rotationaxis>1 0 0 90</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_t.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_t.stl</collision>
+        <diffusecolor>0 0 1</diffusecolor>
+      </geom>
+    </body>
+    <joint name="joint_1_s" type="hinge">
+      <body>torso_link_b1</body>
+      <body>link_1_s</body>
+      <offsetfrom>link_1_s</offsetfrom>
+      <axis>0 0 -1</axis>
+      <limits>-3.13 3.13</limits>
+      <maxvel>2.95</maxvel>
+    </joint>
+    <joint name="joint_2_l" type="hinge">
+      <body>link_1_s</body>
+      <body>link_2_l</body>
+      <offsetfrom>link_2_l</offsetfrom>
+      <axis>0 0 -1</axis>
+      <limits>-1.90 1.90</limits>
+      <maxvel>2.95</maxvel>
+    </joint>
+    <joint name="joint_3_e" type="hinge">
+      <body>link_2_l</body>
+      <body>link_3_e</body>
+      <offsetfrom>link_3_e</offsetfrom>
+      <axis>0 0 -1</axis>
+      <limits>-2.95 2.95</limits>
+      <maxvel>2.95</maxvel>
+    </joint>
+    <joint name="joint_4_u" type="hinge">
+      <body>link_3_e</body>
+      <body>link_4_u</body>
+      <offsetfrom>link_4_u</offsetfrom>
+      <axis>0 0 1</axis>
+      <limits>-2.36 2.36</limits>
+      <maxvel>2.95</maxvel>
+    </joint>
+    <joint name="joint_5_r" type="hinge">
+      <body>link_4_u</body>
+      <body>link_5_r</body>
+      <offsetfrom>link_5_r</offsetfrom>
+      <axis>0 0 1</axis>
+      <limits>-3.13 3.13</limits>
+      <maxvel>3.48</maxvel>
+    </joint>
+    <joint name="joint_6_b" type="hinge">
+      <body>link_5_r</body>
+      <body>link_6_b</body>
+      <offsetfrom>link_6_b</offsetfrom>
+      <axis>0 0 1</axis>
+      <limits>-1.90 1.90</limits>
+      <maxvel>3.48</maxvel>
+    </joint>
+    <joint name="joint_7_t" type="hinge">
+      <body>link_6_b</body>
+      <body>link_7_t</body>
+      <offsetfrom>link_7_t</offsetfrom>
+      <axis>0 0 -1</axis>
+      <limits>-3.13 3.13</limits>
+      <maxvel>6.97</maxvel>
+    </joint>
+  </kinbody>
+  <!-- Right arm -->
+  <kinbody prefix="arm_right_">
+    <body name="link_1_s">
+      <offsetfrom>torso_link_b1</offsetfrom>
+      <translation>0.09996 -0.0275 0.32214</translation>
+      <rotationaxis>1 0 0 90</rotationaxis>
+      <rotationaxis>0 0 1 -180</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_s.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_s.stl</collision>
+        <diffusecolor>0 0 1</diffusecolor>
+      </geom>
+    </body>
+    <body name="link_2_l">
+      <offsetfrom>link_1_s</offsetfrom>
+      <translation>0 0.0577 -0.2255</translation>
+      <rotationaxis>1 0 0 -90</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_l.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_l.stl</collision>
+        <diffusecolor>0.8 0.8 0.8</diffusecolor>
+      </geom>
+    </body>
+    <body name="link_3_e">
+      <offsetfrom>link_2_l</offsetfrom>
+      <translation>0 0.1690 -0.0454</translation>
+      <rotationaxis>1 0 0 90</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_e.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_e.stl</collision>
+        <diffusecolor>0 0 1</diffusecolor>
+      </geom>
+    </body>
+    <body name="link_4_u">
+      <offsetfrom>link_3_e</offsetfrom>
+      <translation>0 -0.0085 -0.181</translation>
+      <rotationaxis>1 0 0 -90</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_u.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_u.stl</collision>
+        <diffusecolor>0.8 0.8 0.8</diffusecolor>
+      </geom>
+    </body>
+    <body name="link_5_r">
+      <offsetfrom>link_4_u</offsetfrom>
+      <translation>0 0.1936 0.0155</translation>
+      <rotationaxis>1 0 0 90</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_r.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_r.stl</collision>
+        <diffusecolor>0 0 1</diffusecolor>
+      </geom>
+    </body>
+    <body name="link_6_b">
+      <offsetfrom>link_5_r</offsetfrom>
+      <translation>0 0.0080 -0.155</translation>
+      <rotationaxis>1 0 0 -90</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_b.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_b.stl</collision>
+        <diffusecolor>0.8 0.8 0.8</diffusecolor>
+      </geom>
+    </body>
+    <body name="link_7_t">
+      <offsetfrom>link_6_b</offsetfrom>
+      <translation>0 0.168 -0.015</translation>
+      <rotationaxis>1 0 0 90</rotationaxis>
+      <geom type="trimesh">
+        <render>meshes/sda10f/visual/motoman_axis_t.stl</render>
+        <collision>meshes/sda10f/collision/motoman_axis_t.stl</collision>
+        <diffusecolor>0 0 1</diffusecolor>
+      </geom>
+    </body>
+    <joint name="joint_1_s" type="hinge">
+      <body>torso_link_b1</body>
+      <body>link_1_s</body>
+      <offsetfrom>link_1_s</offsetfrom>
+      <axis>0 0 1</axis>
+      <limits>-3.13 3.13</limits>
+      <maxvel>2.95</maxvel>
+    </joint>
+    <joint name="joint_2_l" type="hinge">
+      <body>link_1_s</body>
+      <body>link_2_l</body>
+      <offsetfrom>link_2_l</offsetfrom>
+      <axis>0 0 1</axis>
+      <limits>-1.90 1.90</limits>
+      <maxvel>2.95</maxvel>
+    </joint>
+    <joint name="joint_3_e" type="hinge">
+      <body>link_2_l</body>
+      <body>link_3_e</body>
+      <offsetfrom>link_3_e</offsetfrom>
+      <axis>0 0 1</axis>
+      <limits>-2.95 2.95</limits>
+      <maxvel>2.95</maxvel>
+    </joint>
+    <joint name="joint_4_u" type="hinge">
+      <body>link_3_e</body>
+      <body>link_4_u</body>
+      <offsetfrom>link_4_u</offsetfrom>
+      <axis>0 0 -1</axis>
+      <limits>-2.36 2.36</limits>
+      <maxvel>2.95</maxvel>
+    </joint>
+    <joint name="joint_5_r" type="hinge">
+      <body>link_4_u</body>
+      <body>link_5_r</body>
+      <offsetfrom>link_5_r</offsetfrom>
+      <axis>0 0 -1</axis>
+      <limits>-3.13 3.13</limits>
+      <maxvel>3.48</maxvel>
+    </joint>
+    <joint name="joint_6_b" type="hinge">
+      <body>link_5_r</body>
+      <body>link_6_b</body>
+      <offsetfrom>link_6_b</offsetfrom>
+      <axis>0 0 -1</axis>
+      <limits>-1.90 1.90</limits>
+      <maxvel>3.48</maxvel>
+    </joint>
+    <joint name="joint_7_t" type="hinge">
+      <body>link_6_b</body>
+      <body>link_7_t</body>
+      <offsetfrom>link_7_t</offsetfrom>
+      <axis>0 0 1</axis>
+      <limits>-3.13 3.13</limits>
+      <maxvel>6.97</maxvel>
+    </joint>
+  </kinbody>
+
+  <!-- These links never collide with each other -->
+  <kinbody>
+    <adjacent>arm_left_link_1_s arm_left_link_3_e</adjacent>
+    <adjacent>arm_left_link_1_s arm_left_link_4_u</adjacent>
+    <adjacent>arm_left_link_1_s arm_right_link_1_s</adjacent>
+    <adjacent>arm_left_link_1_s arm_right_link_2_l</adjacent>
+    <adjacent>arm_left_link_1_s arm_right_link_3_e</adjacent>
+    <adjacent>arm_left_link_1_s arm_right_link_4_u</adjacent>
+    <adjacent>arm_left_link_1_s torso_base_link</adjacent>
+    <adjacent>arm_left_link_2_l arm_left_link_4_u</adjacent>
+    <adjacent>arm_left_link_2_l arm_left_link_5_r</adjacent>
+    <adjacent>arm_left_link_2_l arm_right_link_1_s</adjacent>
+    <adjacent>arm_left_link_2_l arm_right_link_2_l</adjacent>
+    <adjacent>arm_left_link_2_l arm_right_link_3_e</adjacent>
+    <adjacent>arm_left_link_2_l arm_right_link_4_u</adjacent>
+    <adjacent>arm_left_link_2_l torso_base_link</adjacent>
+    <adjacent>arm_left_link_2_l torso_link_b1</adjacent>
+    <adjacent>arm_left_link_2_l torso_link_b2</adjacent>
+    <adjacent>arm_left_link_3_e arm_left_link_5_r</adjacent>
+    <adjacent>arm_left_link_3_e arm_left_link_6_b</adjacent>
+    <adjacent>arm_left_link_3_e arm_left_link_7_t</adjacent>
+    <adjacent>arm_left_link_3_e arm_right_link_1_s</adjacent>
+    <adjacent>arm_left_link_3_e arm_right_link_2_l</adjacent>
+    <adjacent>arm_left_link_3_e arm_right_link_3_e</adjacent>
+    <adjacent>arm_left_link_3_e arm_right_link_4_u</adjacent>
+    <adjacent>arm_left_link_4_u arm_left_link_6_b</adjacent>
+    <adjacent>arm_left_link_4_u arm_left_link_7_t</adjacent>
+    <adjacent>arm_left_link_4_u arm_right_link_1_s</adjacent>
+    <adjacent>arm_left_link_4_u arm_right_link_2_l</adjacent>
+    <adjacent>arm_left_link_4_u arm_right_link_3_e</adjacent>
+    <adjacent>arm_left_link_5_r arm_left_link_7_t</adjacent>
+    <adjacent>arm_right_link_1_s arm_right_link_3_e</adjacent>
+    <adjacent>arm_right_link_1_s arm_right_link_4_u</adjacent>
+    <adjacent>arm_right_link_1_s torso_base_link</adjacent>
+    <adjacent>arm_right_link_2_l arm_right_link_4_u</adjacent>
+    <adjacent>arm_right_link_2_l arm_right_link_5_r</adjacent>
+    <adjacent>arm_right_link_2_l torso_base_link</adjacent>
+    <adjacent>arm_right_link_2_l torso_link_b1</adjacent>
+    <adjacent>arm_right_link_2_l torso_link_b2</adjacent>
+    <adjacent>arm_right_link_3_e arm_right_link_5_r</adjacent>
+    <adjacent>arm_right_link_3_e arm_right_link_6_b</adjacent>
+    <adjacent>arm_right_link_3_e arm_right_link_7_t</adjacent>
+    <adjacent>arm_right_link_4_u arm_right_link_6_b</adjacent>
+    <adjacent>arm_right_link_4_u arm_right_link_7_t</adjacent>
+    <adjacent>arm_right_link_5_r arm_right_link_7_t</adjacent>
+  </kinbody>
+
+  <!-- Manipulators -->
+  <manipulator name="arm_left_tool0">
+    <base>torso_link_b1</base>
+    <effector>arm_left_link_7_t</effector>
+    <rotationaxis>0 0 1 180</rotationaxis>
+  </manipulator>
+  <manipulator name="arm_right_tool0">
+    <base>torso_link_b1</base>
+    <effector>arm_right_link_7_t</effector>
+    <rotationaxis>0 0 1 180</rotationaxis>
+  </manipulator>
+
+
+</robot>

@@ -42,3 +42,33 @@ Try the following command:
 ```bash
 roslaunch lenny_moveit_config demo.launch
 ```
+
+## Examples
+
+### Visualization in RViz
+```bash
+roslaunch lenny_gazebo test_robot_model.launch
+```
+
+### ROS-Industrial robot simulator
+```bash
+roslaunch lenny_control robot_interface_simulator.launch
+rviz -d `rospack find lenny_gazebo`/config/robot_state.rviz
+```
+
+### Simulation in Gazebo
+```bash
+roslaunch lenny_gazebo robot_simulator.launch
+```
+
+### Bimanual motion planning
+```bash
+rosrun lenny_openrave example_bimanual_planning.py
+```
+
+### Bimanual trajectory execution
+```bash
+roslaunch lenny_control robot_interface_simulator.launch
+rviz -d `rospack find lenny_gazebo`/config/robot_state.rviz
+rosrun lenny_control example_trajectory_controller.py
+```
