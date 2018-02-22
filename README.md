@@ -15,6 +15,7 @@ cd ~/catkin_ws/src
 Clone the required repositories:
 ```bash
 git clone https://github.com/fsuarez6/lenny.git
+git clone https://github.com/crigroup/raveutils.git
 git clone https://github.com/crigroup/cri_gazebo_plugins.git
 git clone https://github.com/pal-robotics/gazebo_ros_link_attacher.git
 ```
@@ -59,6 +60,7 @@ rviz -d `rospack find lenny_gazebo`/config/robot_state.rviz
 ### Simulation in Gazebo
 ```bash
 roslaunch lenny_gazebo robot_simulator.launch
+roslaunch lenny_control controllers.launch
 ```
 
 ### Bimanual motion planning

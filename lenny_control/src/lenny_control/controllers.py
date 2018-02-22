@@ -371,12 +371,12 @@ class TrajectoryController(object):
       self.clear_points()
       pos_array = self.get_joint_positions()
       vel_array = np.zeros(self.num_joints)
-      acc_array = np.zeros(self.num_joints)
+      # acc_array = np.zeros(self.num_joints)
       for i in xrange(len(traj.points)):
         point = JointTrajectoryPoint()
         pos_array[self.active_indices] = traj.points[i].positions
         vel_array[self.active_indices] = traj.points[i].velocities
-        acc_array[self.active_indices] = traj.points[i].accelerations
+        # acc_array[self.active_indices] = traj.points[i].accelerations
         point.positions = pos_array.tolist()
         point.velocities = vel_array.tolist()
         # The Quintic interpolator seems to have some issues. This uses Cubic.
