@@ -60,11 +60,12 @@ rviz -d `rospack find lenny_gazebo`/config/robot_state.rviz
 ### Simulation in Gazebo
 ```bash
 roslaunch lenny_gazebo robot_simulator.launch
-roslaunch lenny_control controllers.launch
 ```
 
 ### Bimanual motion planning
 ```bash
+roslaunch lenny_gazebo robot_simulator.launch
+roslaunch lenny_control controllers.launch
 rosrun lenny_openrave example_bimanual_planning.py
 ```
 
