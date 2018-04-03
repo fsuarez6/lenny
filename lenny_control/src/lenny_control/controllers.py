@@ -106,15 +106,15 @@ class GripperController(object):
 
 class TrajectoryController(object):
   """
-  The `TrajectoryController` uses a `SimpleActionClient` to connect to the
+  The `TrajectoryController` uses a `SimpleActionClient` to connect to a
   `joint_trajectory_action` server. Using the action server interface,
   the robot can be controlled by adding points (joint configurations) to a
   `trajectory_msgs/JointTrajectory` object.
   Each point requires the goal position and the goal time. The velocity is
-  optional. The acceleration is ignored, and calculated from other fields.
+  optional. The acceleration field is `ignored`.
 
   """
-  def __init__(self, timeout=5):
+  def __init__(self, timeout=5.0):
     """
     `TrajectoryController` constructor.
 
@@ -135,14 +135,14 @@ class TrajectoryController(object):
     action_server = 'joint_trajectory_action'
     self.client = actionlib.SimpleActionClient(action_server,
                                                     FollowJointTrajectoryAction)
-    rospy.logdebug('Waiting for [%s] action server' % action_server)
+    rospy.logdebug('Waiting for [{0}] action server'.format(action_server))
     server_up = self.client.wait_for_server(timeout=rospy.Duration(timeout))
     if not server_up:
       rospy.logerr('Timed out waiting for Joint Trajectory Action Server ' +
                    'to connect. Start the action server before.')
       msg = 'JointTrajectoryController timeout: {0}'.format(action_server)
       raise rospy.ROSException(msg)
-    rospy.logdebug('Successfully connected to [%s]' % action_server)
+    rospy.logdebug('Successfully connected to [{0}]'.format(action_server))
     # Subscribe to the joint_states topic
     rospy.Subscriber('joint_states', JointState, self.cb_joint_states,
                                                                   queue_size=1)
@@ -184,16 +184,18 @@ class TrajectoryController(object):
 
   def add_point(self, positions, duration, velocities=None):
     """
-    Add a point to the trajectory. Each point must be specified by the goal position and the goal time. The velocity is optional.
+    Add a point to the trajectory. Each point must be specified by the goal
+    position and the goal time. The velocity is optional.
 
     Parameters
     ----------
-    positions: list
+    positions: array_like
       The goal position in the joint configuration space
     duration: float
       The duration given for the robot to reach the goal position.
-    velocities: list
-      The velocity of arrival at the goal position. If not given, zero-velocity is assumed.
+    velocities: array_like
+      The velocity of arrival at the goal position. If not given, zero-velocity
+      is assumed.
 
     Returns
     -------
@@ -202,8 +204,8 @@ class TrajectoryController(object):
 
     Note
     ----
-    The lenght of the `positions` and `velocities` list must be to the number of
-    active joints
+    The lenght of the `positions` and `velocities` list must be equal to the
+    number of active joints
 
     See Also
     --------
@@ -237,7 +239,14 @@ class TrajectoryController(object):
 
   def execute_plan(self, plan, wait=True):
     """
-    TODO: Write doc for execute_plan
+    Execute a previously planned path using MoveIt `move_group`.
+
+    Parameters
+    ----------
+    plan: moveit_msgs/RobotTrajectory
+      Motion plan to be executed
+    wait:
+      If `True`, the function waits synchronously until the plan is executed.
     """
     self.set_trajectory(plan.joint_trajectory)
     self.start()
@@ -247,8 +256,25 @@ class TrajectoryController(object):
   def get_active_joints(self):
     """
     Return the active joint names.
+
+    Returns
+    -------
+    active_joint_names: list
+      The active joint names.
     """
     return list(self.active_joint_names)
+
+  def get_active_joint_positions(self):
+    """
+    Return the most recent value of the `active` joint positions received
+    through the `joint_states` topic.
+
+    Returns
+    -------
+    active_joint_positions: array_like
+      The `active` joint positions values
+    """
+    return self.get_joint_positions()[self.active_indices]
 
   def get_client_state(self):
     """
@@ -275,19 +301,19 @@ class TrajectoryController(object):
 
   def get_num_points(self):
     """
-    Return the number of points currently added to the trajectory
+    Return the number of points that have been added to the trajectory
 
     Returns
     -------
     num_points: int
-      Number of points currently added to the trajectory
+      Number of points added to the trajectory
     """
     return len(self.goal.trajectory.points)
 
   def get_joint_positions(self):
     """
-    Return the last published value of the joint positions in the `joint_states`
-    topic.
+    Return the most recent value of the joint positions received through the
+    `joint_states` topic.
 
     Returns
     -------
@@ -314,7 +340,7 @@ class TrajectoryController(object):
     Returns
     -------
     result: int
-      The result **after** the trajectory execution request
+      The result **after** the trajectory has been processed
     """
     return self.client.get_result().error_code
 
@@ -324,8 +350,8 @@ class TrajectoryController(object):
 
     Returns
     -------
-    duratio: float
-      The trajectory duration in seconds
+    duration: float
+      The trajectory duration (in seconds)
     """
     duration = rospy.Duration(0)
     if self.get_num_points() > 0:
@@ -334,13 +360,18 @@ class TrajectoryController(object):
 
   def set_active_joints(self, joint_names):
     """
-    Set the active joint names. The given list of joint names must be a ssubset
-    of all the available robot joints
+    Set the active joint names. The given list of joint names must be a subset
+    of all the available robot joints.
 
     Parameters
     ----------
     joint_names: list
       List of joint names that will be controlled
+
+    Returns
+    -------
+    success: bool
+      `True` if the operation was successful, `False` otherwise.
     """
     success = set(joint_names).issubset(self.joint_names)
     if success:
@@ -364,29 +395,30 @@ class TrajectoryController(object):
     Returns
     -------
     success: bool
-      `True` if the trajectory is set, `False` otherwise.
+      `True` if the trajectory is set successfully, `False` otherwise.
     """
     success = False
     if self.set_active_joints(traj.joint_names):
       self.clear_points()
       pos_array = self.get_joint_positions()
       vel_array = np.zeros(self.num_joints)
-      # acc_array = np.zeros(self.num_joints)
+      acc_array = np.zeros(self.num_joints)
       for i in xrange(len(traj.points)):
         point = JointTrajectoryPoint()
         pos_array[self.active_indices] = traj.points[i].positions
         vel_array[self.active_indices] = traj.points[i].velocities
+        # TODO: The Quintic interpolator seems to have some issues when you
+        # specify the acceleration. By setting acc to zero, it uses Cubic.
         # acc_array[self.active_indices] = traj.points[i].accelerations
         point.positions = pos_array.tolist()
         point.velocities = vel_array.tolist()
-        # The Quintic interpolator seems to have some issues. This uses Cubic.
-        # point.accelerations = acc_array.tolist()
+        point.accelerations = acc_array.tolist()
         point.time_from_start = traj.points[i].time_from_start
         self.goal.trajectory.points.append(point)
       success = True
     return success
 
-  def start(self, delay=0.2):
+  def start(self, delay=0.1):
     """
     Start the trajectory. It sends the `FollowJointTrajectoryGoal` to the action
     server.

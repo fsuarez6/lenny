@@ -13,7 +13,7 @@ rospy.init_node('example_bimanual_exe')
 controller = TrajectoryController()
 active_joints = [name for name in controller.joint_names if 'arm' in name]
 controller.set_active_joints(active_joints)
-qrobot = controller.get_joint_positions()
+qrobot = controller.get_active_joint_positions()
 # OpenRAVE
 env = orpy.Environment()
 robot_xml = 'robots/sda10f.robot.xml'
@@ -23,15 +23,17 @@ orpy.RaveSetDebugLevel(orpy.DebugLevel.Fatal)
 env.SetViewer('qtcoin')
 left_manip = robot.GetManipulator('arm_left_tool0')
 right_manip = robot.GetManipulator('arm_right_tool0')
-robot.SetDOFValues(qrobot)
+indices = list(left_manip.GetArmIndices())
+indices += list(right_manip.GetArmIndices())
+robot.SetActiveDOFs(indices)
+robot.SetActiveDOFValues(qrobot)
 # Run forever-loop
 while not rospy.is_shutdown():
   # Find a collision free configuration for both arms
   while True:
     config = ru.kinematics.random_joint_values(robot)
     with robot:
-      indices = np.hstack((left_manip.GetArmIndices(),right_manip.GetArmIndices()))
-      robot.SetDOFValues(config[indices], indices)
+      robot.SetActiveDOFValues(config)
       if not env.CheckCollision(robot):
         # Draw the targets
         Tleft = left_manip.GetEndEffectorTransform()
@@ -44,7 +46,7 @@ while not rospy.is_shutdown():
   left_spec = left_manip.GetArmConfigurationSpecification()
   right_spec = right_manip.GetArmConfigurationSpecification()
   params.SetConfigurationSpecification(env, left_spec+right_spec)
-  params.SetGoalConfig(config[indices])
+  params.SetGoalConfig(config)
   params.SetMaxIterations(80)
   params.SetPostProcessing('ParabolicSmoother',
                                         '<_nmaxiterations>50</_nmaxiterations>')
