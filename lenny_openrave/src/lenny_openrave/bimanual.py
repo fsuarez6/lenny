@@ -36,6 +36,15 @@ class BimanualPlanner(object):
        break
     return anchor_joint
 
+  def estimate_torso_angle(self, Tleft, Tright):
+    Tchild = self.torso_joint.GetSecondAttached().GetTransform()
+    points = np.vstack((Tleft[:3,3],Tright[:3,3]))
+    centroid = np.mean(points, axis=0)
+    centroid_wrt_robot = centroid - Tchild[:3,3]
+    x,y,_ = centroid_wrt_robot
+    angle = np.arctan2(y, x)
+    return angle
+
   def lazy_reachability_check(self, manip, point):
     anchor,armlenght = self._estimate_arm_lenght(manip)
     distance = np.linalg.norm(point - anchor)
@@ -54,6 +63,24 @@ class BimanualPlanner(object):
         if not success:
           break
     return success
+
+  def find_closest_config_index(self, configurations, joint_indices=None,
+                                                  metric_fn=None, weights=None):
+    if joint_indices is None:
+      joint_indices = np.hstack((self.left_indices,self.right_indices))
+    if metric_fn is None:
+      metric_fn = rtsp.metric.max_joint_diff_fn
+    if weights is None:
+      weights = 1. / self.robot.GetDOFVelocityLimits(joint_indices)
+    qrobot = self.robot.GetDOFValues(joint_indices)
+    best_idx = None
+    min_dist = float('inf')
+    for i, q in enumerate(configurations):
+      dist = metric_fn(qrobot, q, weights)
+      if dist < min_dist:
+        min_dist = dist
+        best_idx = i
+    return best_idx
 
   def find_ik_solutions(self, Tleft, Tright, collision_free=True,
                                                               lazy_check=False):
@@ -75,17 +102,21 @@ class BimanualPlanner(object):
                                     self.iktype, collision_free=collision_free)
       if len(right_sols) > 0:
         # The solutions list is the combinations of left and right sols
-        indices = np.hstack((self.left_indices,self.right_indices))
-        for qleft,qright in itertools.product(left_sols, right_sols):
-          config = np.hstack((qleft,qright))
-          self.robot.SetDOFValues(config, indices)
-          valid_config = True
-          if collision_free:
-            if self.robot.CheckSelfCollision():
-              valid_config = False
-          if valid_config:
-            solutions.append(config)
+        with self.robot:
+          indices = np.hstack((self.left_indices,self.right_indices))
+          for qleft,qright in itertools.product(left_sols, right_sols):
+            config = np.hstack((qleft,qright))
+            self.robot.SetDOFValues(config, indices)
+            valid_config = True
+            if collision_free:
+              if self.robot.CheckSelfCollision():
+                valid_config = False
+            if valid_config:
+              solutions.append(config)
     return solutions
+
+  def plan(self, qgoal):
+    pass
 
   def sample_torso_angles(self, torso_step, lower_limit=None, upper_limit=None):
     if lower_limit is None:
@@ -118,3 +149,8 @@ class BimanualPlanner(object):
       self.torso_joint = self.robot.GetJoint(joint_name)
       success = True
     return success
+
+  def set_torso_joint_value(self, value):
+    idx = self.torso_joint.GetDOFIndex()
+    with self.env:
+      self.robot.SetDOFValues([value], [idx])
