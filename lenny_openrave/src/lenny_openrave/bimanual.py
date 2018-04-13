@@ -115,8 +115,30 @@ class BimanualPlanner(object):
               solutions.append(config)
     return solutions
 
-  def plan(self, qgoal):
-    pass
+  def plan(self, qgoal, max_iters=40, max_ppiters=40):
+    traj = orpy.RaveCreateTrajectory(self.env, '')
+    params = orpy.Planner.PlannerParameters()
+    # Configuration specification
+    robot_name = self.robot.GetName()
+    torso_idx = self.torso_joint.GetDOFIndex()
+    spec = orpy.ConfigurationSpecification()
+    spec.AddGroup('joint_values {0} {1}'.format(robot_name, torso_idx), 1, '')
+    left_spec = self.left_manip.GetArmConfigurationSpecification()
+    right_spec = self.right_manip.GetArmConfigurationSpecification()
+    spec += left_spec + right_spec
+    params.SetConfigurationSpecification(self.env, spec)
+    params.SetGoalConfig(qgoal)
+    params.SetMaxIterations(max_iters)
+    params.SetPostProcessing('ParabolicSmoother',
+                    '<_nmaxiterations>{}</_nmaxiterations>'.format(max_ppiters))
+    planner = orpy.RaveCreatePlanner(self.env, 'BiRRT')
+    success = planner.InitPlan(None, params)
+    status = orpy.PlannerStatus.Failed
+    if success:
+      status = planner.PlanPath(traj)
+    if status != orpy.PlannerStatus.HasSolution:
+      traj = None
+    return traj
 
   def sample_torso_angles(self, torso_step, lower_limit=None, upper_limit=None):
     if lower_limit is None:

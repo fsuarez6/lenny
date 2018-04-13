@@ -8,6 +8,15 @@ import openravepy as orpy
 # Bimanual planner
 from lenny_openrave.bimanual import BimanualPlanner
 
+"""
+Reachability limits
+y = [0.44, 0.84]
+"""
+
+class Color(object):
+  YELLOW  = (1, 1, 0)
+  BLUE    = (0, 0.412, 0.58)
+  RED     = (1, 0, 0)
 
 np.set_printoptions(precision=6, suppress=True)
 # Load the environment
@@ -18,9 +27,36 @@ if not env.Load(world_xml):
 robot = env.GetRobot('robot')
 # orpy.RaveSetDebugLevel(orpy.DebugLevel.Fatal)
 env.SetViewer('qtcoin')
+viewer = env.GetViewer()
+# Add the plastic bins relative to the bins table
+bins_table = env.GetKinBody('bins_table')
+aabb = bins_table.ComputeAABB()
+xdim, _, zdim = 2*aabb.extents()
+Tabove_table = bins_table.GetTransform()
+Tabove_table[2,3] += zdim + br._EPS
+offset = xdim / 2. - 0.135
+direction = Tabove_table[:3,0]
+placements = [-1, 0, 1]
+colors = [Color.YELLOW, Color.BLUE, Color.RED]
+names = ['yellow_bin', 'blue_bin', 'red_bin']
+for name,placement,color in zip(names, placements, colors):
+  body = env.ReadKinBodyXMLFile('objects/plastic_bin.kinbody.xml')
+  Tbody = np.array(Tabove_table)
+  Tbody[:3,3] += offset*direction*placement
+  with env:
+    body.SetName(name)
+    env.Add(body)
+    body.SetTransform(Tbody)
+  ru.body.set_body_color(body, diffuse=color)
+# Add the cubes randomly
+#  objects/wood_cube.kinbody.xml
 # Reduce the velocity limits
 velocity_limits = robot.GetDOFVelocityLimits()
-robot.SetDOFVelocityLimits(0.1*velocity_limits)
+robot.SetDOFVelocityLimits(0.25*velocity_limits)
+# Set the viewer camera
+Tcam = br.euler.to_transform(*np.deg2rad([-120, 0, 90]))
+Tcam[:3,3] = [2.5, 0.25, 2]
+viewer.SetCamera(Tcam)
 # Initialize the bimanual planner
 bimanual = BimanualPlanner(robot)
 bimanual.set_left_manipulator('arm_left_tool0')
@@ -42,33 +78,7 @@ with robot:
   solutions = bimanual.find_ik_solutions(Tleft, Tright)
   idx = bimanual.find_closest_config_index(solutions)
   qarms = solutions[idx]
-
-self = bimanual
-qgoal = np.hstack((torso_angle, qarms))
+# robot.SetDOFValues(np.hstack((torso_angle, qarms)))
 # Plan the bimanual motion
-t0 = time.time()
-params = orpy.Planner.PlannerParameters()
-# Configuration specification
-robot_name = self.robot.GetName()
-torso_idx = self.torso_joint.GetDOFIndex()
-spec = orpy.ConfigurationSpecification()
-spec.AddGroup('joint_values {0} {1}'.format(robot_name, torso_idx), 1, '')
-left_spec = self.left_manip.GetArmConfigurationSpecification()
-right_spec = self.right_manip.GetArmConfigurationSpecification()
-spec += left_spec + right_spec
-params.SetConfigurationSpecification(self.env, spec)
-params.SetGoalConfig(qgoal)
-params.SetMaxIterations(80)
-params.SetPostProcessing('ParabolicSmoother',
-                                      '<_nmaxiterations>50</_nmaxiterations>')
-# Start the planner
-traj = orpy.RaveCreateTrajectory(env, '')
-planner = orpy.RaveCreatePlanner(env, 'BiRRT')
-success = planner.InitPlan(None, params)
-status = orpy.PlannerStatus.Failed
-if success:
-  status = planner.PlanPath(traj)
-duration = time.time() - t0
-if status == orpy.PlannerStatus.HasSolution:
-  robot.GetController().SetPath(traj)
-  robot.WaitForController(0)
+traj = bimanual.plan(np.hstack((torso_angle, qarms)))
+robot.GetController().SetPath(traj)
