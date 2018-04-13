@@ -144,18 +144,28 @@ class TrajectoryController(object):
       raise rospy.ROSException(msg)
     rospy.logdebug('Successfully connected to [{0}]'.format(action_server))
     # Subscribe to the joint_states topic
+    param = '/controller_joint_names'
+    self.joint_names = rospy.get_param(param, [])
+    if len(self.joint_names) == 0:
+      msg = 'Failed to find parameter: {}'.format(param)
+      rospy.logerr(msg)
+      raise rospy.ROSException(msg)
+    self.num_joints = len(self.joint_names)
+    self.joint_positions = np.zeros(self.num_joints)
     rospy.Subscriber('joint_states', JointState, self.cb_joint_states,
                                                                   queue_size=1)
-    rospy.logdebug('Waiting for the [joint_states] topic')
-    self.joint_names = None
+    rospy.logdebug('Waiting for topic: joint_states')
+    success = False
     t0 = rospy.get_time()
-    while self.joint_names is None:
+    while not success:
+      success = np.isclose(self.joint_positions, 0).any()
       if rospy.is_shutdown() or (rospy.get_time()-t0) > timeout:
         break
       rospy.sleep(0.01)
-    if self.joint_names is None:
-      rospy.logerr('Timed out waiting for joint_states topic')
-      return
+    if not success:
+      msg = 'Timed out waiting for topic: joint_states'
+      rospy.logerr(msg)
+      raise rospy.ROSException(msg)
     # Create the goal instance
     self.goal = FollowJointTrajectoryGoal()
     self.goal.trajectory.joint_names = list(self.joint_names)
@@ -171,16 +181,13 @@ class TrajectoryController(object):
     msg: sensor_msgs/JointState
       The robot joint state message
     """
-    if self.joint_names is None:
-      # Get the joint names only once.
-      self.joint_names = [joint for joint in msg.name if 'robotiq' not in joint]
-      self.num_joints = len(self.joint_names)
     with self.mutex:
-      tmp_positions = []
-      for i,joint in enumerate(msg.name):
-        if 'robotiq' not in joint:
-          tmp_positions.append(msg.position[i])
-      self.joint_positions = np.array(tmp_positions)
+      for msg_idx,name in enumerate(msg.name):
+        if 'robotiq' in name:
+          continue
+        if name in self.joint_names:
+          idx = self.joint_names.index(name)
+          self.joint_positions[idx] = msg.position[msg_idx]
 
   def add_point(self, positions, duration, velocities=None):
     """
