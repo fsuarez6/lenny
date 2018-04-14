@@ -9,99 +9,6 @@ from control_msgs.msg import (FollowJointTrajectoryAction,
                                                       FollowJointTrajectoryGoal)
 from sensor_msgs.msg import JointState
 from trajectory_msgs.msg import JointTrajectoryPoint
-# Gripper action
-from control_msgs.msg import GripperCommandAction, GripperCommandGoal
-# Link attacher
-from gazebo_ros_link_attacher.srv import Attach, AttachRequest, AttachResponse
-
-
-class GripperController(object):
-  def __init__(self, ns, timeout=5.0, attach_link='lenny::arm_left_link_7_t'):
-    # gazebo_ros link attacher
-    self.attach_link = attach_link
-    self.attach_srv = rospy.ServiceProxy('/link_attacher_node/attach', Attach)
-    self.detach_srv = rospy.ServiceProxy('/link_attacher_node/detach', Attach)
-    rospy.logdebug('Waiting srv: {0}'.format(self.attach_srv.resolved_name))
-    rospy.logdebug('Waiting srv: {0}'.format(self.detach_srv.resolved_name))
-    self.attach_srv.wait_for_service()
-    self.detach_srv.wait_for_service()
-    # Gripper action server
-    action_server = '{}/gripper_cmd'.format(ns)
-    self._client = actionlib.SimpleActionClient(action_server,
-                                                          GripperCommandAction)
-    self._goal = GripperCommandGoal()
-    rospy.logdebug('Waiting for [%s] action server' % action_server)
-    server_up = self._client.wait_for_server(timeout=rospy.Duration(timeout))
-    if not server_up:
-      rospy.logerr('Timed out waiting for Gripper Command'
-                   ' Action Server to connect. Start the action server'
-                   ' before running this node.')
-      raise rospy.ROSException('GripperCommandAction timed out: {0}'.format(action_server))
-    rospy.logdebug('Successfully connected to [%s]' % action_server)
-    rospy.loginfo('GripperCommandAction initialized')
-
-  def close(self):
-    self.command(0.0)
-
-  def command(self, position):
-    angle = self.distance_to_angle(position)
-    self._goal.command.position = angle
-    self._client.send_goal(self._goal)
-
-  def distance_to_angle(self, distance):
-    max_gap = 0.085
-    distance = np.clip(distance, 0, max_gap)
-    angle = (max_gap - distance) * np.deg2rad(46) / max_gap
-    return angle
-
-  def get_result(self):
-    return self._client.get_result().error_code
-
-  def get_state(self):
-    return self._client.get_state()
-
-  def grab(self, link_name):
-    parent = self.attach_link.rsplit('::')
-    if '::' in link_name:
-      divider = '::'
-    elif '.' in link_name:
-      divider = '.'
-    else:
-      return False
-    child = link_name.rsplit(divider)
-    req = AttachRequest()
-    req.model_name_1 = parent[0]
-    req.link_name_1 = parent[1]
-    req.model_name_2 = child[0]
-    req.link_name_2 = child[1]
-    res = self.attach_srv.call(req)
-    return res.ok
-
-  def open(self):
-    self.command(0.085)
-
-  def release(self, link_name):
-    parent = self.attach_link.rsplit('::')
-    if '::' in link_name:
-      divider = '::'
-    elif '.' in link_name:
-      divider = '.'
-    else:
-      return False
-    child = link_name.rsplit(divider)
-    req = AttachRequest()
-    req.model_name_1 = parent[0]
-    req.link_name_1 = parent[1]
-    req.model_name_2 = child[0]
-    req.link_name_2 = child[1]
-    res = self.detach_srv.call(req)
-    return res.ok
-
-  def stop(self):
-    self._client.cancel_goal()
-
-  def wait(self, timeout=15.0):
-    return self._client.wait_for_result(timeout=rospy.Duration(timeout))
 
 
 class TrajectoryController(object):
@@ -151,14 +58,15 @@ class TrajectoryController(object):
       rospy.logerr(msg)
       raise rospy.ROSException(msg)
     self.num_joints = len(self.joint_names)
-    self.joint_positions = np.zeros(self.num_joints)
+    # Initialize the joint positions to nan (not a number)
+    self.joint_positions = np.full(self.num_joints, np.nan, dtype=float)
     rospy.Subscriber('joint_states', JointState, self.cb_joint_states,
                                                                   queue_size=1)
     rospy.logdebug('Waiting for topic: joint_states')
     success = False
     t0 = rospy.get_time()
     while not success:
-      success = np.isclose(self.joint_positions, 0).any()
+      success = np.isnan(self.joint_positions).any()
       if rospy.is_shutdown() or (rospy.get_time()-t0) > timeout:
         break
       rospy.sleep(0.01)
@@ -169,6 +77,8 @@ class TrajectoryController(object):
     # Create the goal instance
     self.goal = FollowJointTrajectoryGoal()
     self.goal.trajectory.joint_names = list(self.joint_names)
+    # Give it some time for the connections to settle
+    rospy.sleep(0.5)
     rospy.loginfo('TrajectoryController successfully initialized')
 
   def cb_joint_states(self, msg):
@@ -183,8 +93,6 @@ class TrajectoryController(object):
     """
     with self.mutex:
       for msg_idx,name in enumerate(msg.name):
-        if 'robotiq' in name:
-          continue
         if name in self.joint_names:
           idx = self.joint_names.index(name)
           self.joint_positions[idx] = msg.position[msg_idx]
@@ -260,6 +168,48 @@ class TrajectoryController(object):
     if wait:
       self.wait()
 
+  def get_action_result(self):
+    """
+    Return the result **after** the trajectory execution request has been
+    processed. Possible values are:
+
+    - FollowJointTrajectoryResult.SUCCESSFUL = 0
+    - FollowJointTrajectoryResult.INVALID_GOAL = -1
+    - FollowJointTrajectoryResult.INVALID_JOINTS = -2
+    - FollowJointTrajectoryResult.OLD_HEADER_TIMESTAMP = -3
+    - FollowJointTrajectoryResult.PATH_TOLERANCE_VIOLATED = -4
+    - FollowJointTrajectoryResult.GOAL_TOLERANCE_VIOLATED = -5
+
+    Returns
+    -------
+    result: int
+      The result **after** the trajectory has been processed
+    """
+    return self.client.get_result()
+
+  def get_action_state(self):
+    """
+    Return the result **during** the processing of the trajectory execution
+    request. Possible values are:
+
+    - GoalStatus.PENDING=0
+    - GoalStatus.ACTIVE=1
+    - GoalStatus.PREEMPTED=2
+    - GoalStatus.SUCCEEDED=3
+    - GoalStatus.ABORTED=4
+    - GoalStatus.REJECTED=5
+    - GoalStatus.PREEMPTING=6
+    - GoalStatus.RECALLING=7
+    - GoalStatus.RECALLED=8
+    - GoalStatus.LOST=9
+
+    Returns
+    -------
+    result: int
+      The state **during** the processing of the trajectory execution request
+    """
+    return self.client.get_state()
+
   def get_active_joints(self):
     """
     Return the active joint names.
@@ -283,29 +233,6 @@ class TrajectoryController(object):
     """
     return self.get_joint_positions()[self.active_indices]
 
-  def get_client_state(self):
-    """
-    Return the result **during** the processing of the trajectory execution
-    request. Possible values are:
-
-    - GoalStatus.PENDING=0
-    - GoalStatus.ACTIVE=1
-    - GoalStatus.PREEMPTED=2
-    - GoalStatus.SUCCEEDED=3
-    - GoalStatus.ABORTED=4
-    - GoalStatus.REJECTED=5
-    - GoalStatus.PREEMPTING=6
-    - GoalStatus.RECALLING=7
-    - GoalStatus.RECALLED=8
-    - GoalStatus.LOST=9
-
-    Returns
-    -------
-    result: int
-      The state **during** the processing of the trajectory execution request
-    """
-    self.client.get_state()
-
   def get_num_points(self):
     """
     Return the number of points that have been added to the trajectory
@@ -316,6 +243,17 @@ class TrajectoryController(object):
       Number of points added to the trajectory
     """
     return len(self.goal.trajectory.points)
+
+  def get_joint_names(self):
+    """
+    Return the names of all the joints.
+
+    Returns
+    -------
+    joint_names: list
+      All the robot joint names.
+    """
+    return list(self.joint_names)
 
   def get_joint_positions(self):
     """
@@ -331,25 +269,6 @@ class TrajectoryController(object):
       # Make a thread-safe copy of the joint positions
       joint_positions = np.array(self.joint_positions, copy=True)
     return joint_positions
-
-  def get_result(self):
-    """
-    Return the result **after** the trajectory execution request has been
-    processed. Possible values are:
-
-    - FollowJointTrajectoryResult.SUCCESSFUL = 0
-    - FollowJointTrajectoryResult.INVALID_GOAL = -1
-    - FollowJointTrajectoryResult.INVALID_JOINTS = -2
-    - FollowJointTrajectoryResult.OLD_HEADER_TIMESTAMP = -3
-    - FollowJointTrajectoryResult.PATH_TOLERANCE_VIOLATED = -4
-    - FollowJointTrajectoryResult.GOAL_TOLERANCE_VIOLATED = -5
-
-    Returns
-    -------
-    result: int
-      The result **after** the trajectory has been processed
-    """
-    return self.client.get_result().error_code
 
   def get_trajectory_duration(self):
     """
@@ -425,7 +344,7 @@ class TrajectoryController(object):
       success = True
     return success
 
-  def start(self, delay=0.1):
+  def start(self, delay=0.0):
     """
     Start the trajectory. It sends the `FollowJointTrajectoryGoal` to the action
     server.
@@ -449,7 +368,7 @@ class TrajectoryController(object):
     """
     self.client.cancel_goal()
 
-  def wait(self, timeout=0.5):
+  def wait(self, timeout=0.1):
     """
     Wait synchronously (with a timeout) until the trajectory action server gives
     a result.
@@ -458,6 +377,16 @@ class TrajectoryController(object):
     ----------
     timeout: float
       The additional time to wait on top of the trajectory duration
+
+    Returns
+    -------
+    done: bool
+      `True` if the goal finished. False if the goal didn't finish within the
+      allocated timeout
     """
     duration = self.get_trajectory_duration() + timeout
-    return self.client.wait_for_result(timeout=rospy.Duration(duration))
+    done = self.client.wait_for_result(timeout=rospy.Duration(duration))
+    if not done:
+      self.stop()
+      rospy.sleep(0.5)
+    return done
