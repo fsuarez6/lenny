@@ -5,6 +5,7 @@ import numpy as np
 import raveutils as ru
 import robotsp as rtsp
 import openravepy as orpy
+from shapely.geometry import LineString
 
 
 class BimanualPlanner(object):
@@ -15,6 +16,8 @@ class BimanualPlanner(object):
     # Initialize variables
     self.left_manip = None
     self.right_manip = None
+    self.left_anchor_joint = None
+    self.right_anchor_joint = None
     self.iktype = orpy.IkParameterizationType.Transform6D
     self.torso_joint = None
 
@@ -36,33 +39,14 @@ class BimanualPlanner(object):
        break
     return anchor_joint
 
-  def estimate_torso_angle(self, Tleft, Tright):
+  def estimate_torso_angle(self, left_point, right_point):
     Tchild = self.torso_joint.GetSecondAttached().GetTransform()
-    points = np.vstack((Tleft[:3,3],Tright[:3,3]))
+    points = np.vstack((left_point,right_point))
     centroid = np.mean(points, axis=0)
     centroid_wrt_robot = centroid - Tchild[:3,3]
     x,y,_ = centroid_wrt_robot
     angle = np.arctan2(y, x)
     return angle
-
-  def lazy_reachability_check(self, manip, point):
-    anchor,armlenght = self._estimate_arm_lenght(manip)
-    distance = np.linalg.norm(point - anchor)
-    reachable = distance < armlenght
-    return reachable
-
-  def load_ikfast(self, freeinc=np.pi/6.):
-    success = False
-    from openravepy.databases.inversekinematics import InverseKinematicsModel
-    manipulators = [self.left_manip, self.right_manip]
-    if None not in manipulators:
-      for manip in manipulators:
-        ikmodel = InverseKinematicsModel(self.robot, iktype=self.iktype,
-                                                                    manip=manip)
-        success = ikmodel.load(freeinc=[freeinc])
-        if not success:
-          break
-    return success
 
   def find_closest_config_index(self, configurations, joint_indices=None,
                                                   metric_fn=None, weights=None):
@@ -140,6 +124,33 @@ class BimanualPlanner(object):
       traj = None
     return traj
 
+  def lazy_reachability_check(self, manip, point):
+    anchor,armlenght = self._estimate_arm_lenght(manip)
+    distance = np.linalg.norm(point - anchor)
+    reachable = distance < armlenght
+    return reachable
+
+  def lazy_crossed_arms_check(self, left_point, right_point):
+    left_anchor_pos = self.left_anchor_joint.GetAnchor()
+    right_anchor_pos = self.right_anchor_joint.GetAnchor()
+    left_line = LineString([left_anchor_pos[:2], left_point[:2]])
+    right_line = LineString([right_anchor_pos[:2], right_point[:2]])
+    crossed_arms = not left_line.intersection(right_line).is_empty
+    return crossed_arms
+
+  def load_ikfast(self, freeinc=np.pi/6.):
+    success = False
+    from openravepy.databases.inversekinematics import InverseKinematicsModel
+    manipulators = [self.left_manip, self.right_manip]
+    if None not in manipulators:
+      for manip in manipulators:
+        ikmodel = InverseKinematicsModel(self.robot, iktype=self.iktype,
+                                                                    manip=manip)
+        success = ikmodel.load(freeinc=[freeinc])
+        if not success:
+          break
+    return success
+
   def sample_torso_angles(self, torso_step, lower_limit=None, upper_limit=None):
     if lower_limit is None:
       lower_limit = float(self.torso_joint.GetLimits()[0])
@@ -155,6 +166,7 @@ class BimanualPlanner(object):
     if self.left_manip is not None:
       success = True
       self.left_indices = self.left_manip.GetArmIndices()
+      self.left_anchor_joint = self._get_anchor_joint(self.left_manip)
     return success
 
   def set_right_manipulator(self, manip_name):
@@ -163,6 +175,7 @@ class BimanualPlanner(object):
     if self.right_manip is not None:
       success = True
       self.right_indices = self.right_manip.GetArmIndices()
+      self.right_anchor_joint = self._get_anchor_joint(self.right_manip)
     return success
 
   def set_torso_joint(self, joint_name):

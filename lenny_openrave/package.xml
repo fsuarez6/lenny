@@ -16,6 +16,7 @@
   <exec_depend>baldor</exec_depend>
   <exec_depend>criutils</exec_depend>
   <exec_depend>motoman_sda10f_support</exec_depend>
+  <exec_depend>python-shapely</exec_depend>
   <exec_depend>raveutils</exec_depend>
 
 </package>
