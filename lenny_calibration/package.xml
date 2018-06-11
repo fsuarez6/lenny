@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>lenny_calibration</name>
+  <version>0.0.0</version>
+  <description>The lenny_calibration package</description>
+
+  <author email="fsuarez6@gmail.com">Francisco Suarez-Ruiz</author>
+  <maintainer email="fsuarez6@gmail.com">Francisco Suarez-Ruiz</maintainer>
+  <license>BSD 3-Clause</license>
+  <url type="repository">https://github.com/fsuarez6/lenny</url>
+  <url type="bugtracker">https://github.com/fsuarez6/lenny/issues</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>cv_bridge</build_depend>
+
+  <run_depend>aruco_ros</run_depend>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>handeye</run_depend>
+
+</package>

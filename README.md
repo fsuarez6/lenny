@@ -75,3 +75,14 @@ roslaunch lenny_control robot_interface_simulator.launch
 rviz -d `rospack find lenny_gazebo`/config/robot_state.rviz
 rosrun lenny_control example_trajectory_controller.py
 ```
+
+### Camera-robot calibration
+```bash
+roslaunch lenny_gazebo camera_robot_calibration.launch
+roslaunch lenny_control controllers.launch
+roslaunch lenny_moveit_config move_group.launch
+roslaunch lenny_moveit_config moveit_rviz.launch config:=true
+roslaunch lenny_calibration aruco_single_marker.launch
+rosrun image_view image_view image:=/aruco_single/result
+rosrun image_view image_view image:=/kinect/rgb/image_raw
+```

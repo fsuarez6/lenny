@@ -9,6 +9,7 @@
   <arg name="gui"         default="true"/>
   <arg name="rate"        default="125" />
   <arg name="world_name"  default="worlds/empty.world" />
+  <arg name="model"       default="lenny" />
 
   <!-- Remap trajectory action topics to match the ROS-I specification -->
   <!-- http://wiki.ros.org/Industrial/Industrial_Robot_Driver_Spec -->
@@ -26,7 +27,9 @@
   </include>
 
   <!-- send robot urdf to param server -->
-  <include file="$(find lenny_gazebo)/launch/load_lenny_description.launch"/>
+  <include file="$(find lenny_gazebo)/launch/load_lenny_description.launch">
+    <arg name="model" value="$(arg model)" />
+  </include>
   <!-- spawn robot in gazebo -->
   <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model lenny" output="screen" />
 </launch>

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="marker_id"       default="582"/>
+    <arg name="marker_size"     default="0.08"/>
+    <arg name="marker_frame"    default=""/>
+     <!-- NONE, HARRIS, LINES, SUBPIX -->
+    <arg name="corner_refinement" default="LINES" />
+
+    <node pkg="aruco_ros" type="single" name="marker_detection">
+        <remap from="/camera_info"        to="/kinect/rgb/camera_info" />
+        <remap from="/image"              to="/kinect/rgb/image_raw" />
+        <param name="image_is_rectified"  value="False"/>
+        <param name="marker_size"         value="$(arg marker_size)"/>
+        <param name="marker_id"           value="$(arg marker_id)"/>
+        <param name="reference_frame"     value="camera_optical_frame"/>
+        <param name="camera_frame"        value="camera_optical_frame"/>
+        <param name="marker_frame"        value="marker_$(arg marker_id)" />
+        <param name="corner_refinement"   value="$(arg corner_refinement)" />
+    </node>
+</launch>

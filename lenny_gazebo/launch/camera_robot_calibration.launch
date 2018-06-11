@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- launch file parameters -->
+  <arg name="paused"      default="false"/>
+  <arg name="debug"       default="false"/>
+  <arg name="gui"         default="true"/>
+  <arg name="rate"        default="125" />
+  <arg name="model"       value="lenny_calibration" />
+  <arg name="world_name"  value="$(find lenny_gazebo)/worlds/camera_robot_calibration.world" />
+
+  <!-- startup simulated world -->
+  <include file="$(find lenny_gazebo)/launch/robot_simulator.launch">
+    <arg name="world_name"  value="$(arg world_name)"/>
+    <arg name="paused"      value="$(arg paused)"/>
+    <arg name="model"       value="$(arg model)"/>
+    <arg name="debug"       value="$(arg debug)"/>
+    <arg name="gui"         value="$(arg gui)"/>
+  </include>
+</launch>

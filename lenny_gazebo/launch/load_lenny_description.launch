@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="model"   default="lenny" />
+
 	<param name="robot_description"
-    command="xacro --inorder $(find lenny_gazebo)/urdf/lenny.xacro" />
+    command="xacro --inorder $(find lenny_gazebo)/urdf/$(arg model).xacro" />
 </launch>
