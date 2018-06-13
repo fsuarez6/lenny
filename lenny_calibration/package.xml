@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>lenny_calibration</name>
   <version>0.0.0</version>
   <description>The lenny_calibration package</description>
@@ -11,10 +11,15 @@
   <url type="bugtracker">https://github.com/fsuarez6/lenny/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>cv_bridge</build_depend>
 
-  <run_depend>aruco_ros</run_depend>
-  <run_depend>cv_bridge</run_depend>
-  <run_depend>handeye</run_depend>
+  <depend>cv_bridge</depend>
+
+  <exec_depend>aruco_ros</exec_depend>
+  <exec_depend>baldor</exec_depend>
+  <exec_depend>criutils</exec_depend>
+  <exec_depend>handeye</exec_depend>
+  <exec_depend>rqt_service_caller</exec_depend>
+  <exec_depend>resource_retriever</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
 
 </package>

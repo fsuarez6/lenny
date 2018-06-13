@@ -15,6 +15,7 @@ cd ~/catkin_ws/src
 Clone the required repositories:
 ```bash
 git clone https://github.com/fsuarez6/lenny.git
+git clone https://github.com/crigroup/handeye.git
 git clone https://github.com/crigroup/raveutils.git
 git clone https://github.com/crigroup/cri_gazebo_plugins.git
 git clone https://github.com/pal-robotics/gazebo_ros_link_attacher.git
@@ -78,11 +79,12 @@ rosrun lenny_control example_trajectory_controller.py
 
 ### Camera-robot calibration
 ```bash
-roslaunch lenny_gazebo camera_robot_calibration.launch
-roslaunch lenny_control controllers.launch
-roslaunch lenny_moveit_config move_group.launch
-roslaunch lenny_moveit_config moveit_rviz.launch config:=true
-roslaunch lenny_calibration aruco_single_marker.launch
-rosrun image_view image_view image:=/aruco_single/result
-rosrun image_view image_view image:=/kinect/rgb/image_raw
+roslaunch lenny_gazebo camera_robot_calibration.launch gui:=false
+rosrun lenny_calibration camera_robot_calibration.py
+rosrun rqt_service_caller rqt_service_caller
+```
+
+```bash
+rosrun lenny_gazebo model_tf_broadcaster.py --name openni_kinect --rate 10
+rosrun tf static_transform_publisher 0 0 0.035 -1.5708 0 -1.5708 openni_kinect camera_optical_frame 100
 ```

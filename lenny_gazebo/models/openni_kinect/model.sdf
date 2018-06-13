@@ -43,7 +43,7 @@
           <depthImageTopicName>depth/image_raw</depthImageTopicName>
           <depthImageInfoTopicName>depth/camera_info</depthImageInfoTopicName>
           <pointCloudTopicName>depth/points</pointCloudTopicName>
-          <frameName>openni_depth_optical_frame</frameName>
+          <frameName>camera_optical_frame</frameName>
           <pointCloudCutoff>0.4</pointCloudCutoff>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
@@ -54,7 +54,7 @@
           <Cx>0</Cx>
           <Cy>0</Cy>
           <focalLength>0</focalLength>
-          <hackBaseline>0.07</hackBaseline>
+          <hackBaseline>0</hackBaseline>
         </plugin>
       </sensor>
     </link>
