@@ -78,12 +78,18 @@ rosrun lenny_control example_trajectory_controller.py
 ```
 
 ### Camera-robot calibration
+First, capture the calibration poses:
 ```bash
-roslaunch lenny_gazebo camera_robot_calibration.launch gui:=false
-rosrun lenny_calibration camera_robot_calibration.py
-rosrun rqt_service_caller rqt_service_caller
+roslaunch lenny_calibration capture_poses.launch gui:=false
 ```
 
+Then, use the generated `rosbag` to perform the Handeye calibration:
+```bash
+rosrun lenny_gazebo model_tf_broadcaster.py --name openni_kinect --rate 10
+rosrun tf static_transform_publisher 0 0 0.035 -1.5708 0 -1.5708 openni_kinect camera_optical_frame 100
+```
+
+The kinect ground truth can be tested as follows:
 ```bash
 rosrun lenny_gazebo model_tf_broadcaster.py --name openni_kinect --rate 10
 rosrun tf static_transform_publisher 0 0 0.035 -1.5708 0 -1.5708 openni_kinect camera_optical_frame 100

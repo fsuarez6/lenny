@@ -577,6 +577,158 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        arm_left_coupler:
+          Value: true
+        arm_left_link_1_s:
+          Value: true
+        arm_left_link_2_l:
+          Value: true
+        arm_left_link_3_e:
+          Value: true
+        arm_left_link_4_u:
+          Value: true
+        arm_left_link_5_r:
+          Value: true
+        arm_left_link_6_b:
+          Value: true
+        arm_left_link_7_t:
+          Value: true
+        arm_left_link_tool0:
+          Value: true
+        arm_left_robotiq_85_base_link:
+          Value: false
+        arm_left_robotiq_85_left_finger_link:
+          Value: false
+        arm_left_robotiq_85_left_finger_tip_link:
+          Value: false
+        arm_left_robotiq_85_left_inner_knuckle_link:
+          Value: false
+        arm_left_robotiq_85_left_knuckle_link:
+          Value: false
+        arm_left_robotiq_85_right_finger_link:
+          Value: false
+        arm_left_robotiq_85_right_finger_tip_link:
+          Value: false
+        arm_left_robotiq_85_right_inner_knuckle_link:
+          Value: false
+        arm_left_robotiq_85_right_knuckle_link:
+          Value: false
+        arm_right_coupler:
+          Value: true
+        arm_right_link_1_s:
+          Value: true
+        arm_right_link_2_l:
+          Value: true
+        arm_right_link_3_e:
+          Value: true
+        arm_right_link_4_u:
+          Value: true
+        arm_right_link_5_r:
+          Value: true
+        arm_right_link_6_b:
+          Value: true
+        arm_right_link_7_t:
+          Value: true
+        arm_right_link_tool0:
+          Value: true
+        arm_right_robotiq_85_base_link:
+          Value: true
+        arm_right_robotiq_85_left_finger_link:
+          Value: true
+        arm_right_robotiq_85_left_finger_tip_link:
+          Value: true
+        arm_right_robotiq_85_left_inner_knuckle_link:
+          Value: true
+        arm_right_robotiq_85_left_knuckle_link:
+          Value: true
+        arm_right_robotiq_85_right_finger_link:
+          Value: true
+        arm_right_robotiq_85_right_finger_tip_link:
+          Value: true
+        arm_right_robotiq_85_right_inner_knuckle_link:
+          Value: true
+        arm_right_robotiq_85_right_knuckle_link:
+          Value: true
+        aruco_marker_link:
+          Value: false
+        camera_optical_frame:
+          Value: true
+        marker_582:
+          Value: true
+        openni_kinect:
+          Value: true
+        torso_base_link:
+          Value: true
+        torso_link_b1:
+          Value: true
+        world:
+          Value: true
+      Marker Scale: 0.200000003
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        world:
+          openni_kinect:
+            camera_optical_frame:
+              marker_582:
+                {}
+          torso_base_link:
+            torso_link_b1:
+              arm_left_link_1_s:
+                arm_left_link_2_l:
+                  arm_left_link_3_e:
+                    arm_left_link_4_u:
+                      arm_left_link_5_r:
+                        arm_left_link_6_b:
+                          arm_left_link_7_t:
+                            arm_left_link_tool0:
+                              arm_left_coupler:
+                                arm_left_robotiq_85_base_link:
+                                  arm_left_robotiq_85_left_inner_knuckle_link:
+                                    arm_left_robotiq_85_left_finger_tip_link:
+                                      {}
+                                  arm_left_robotiq_85_left_knuckle_link:
+                                    arm_left_robotiq_85_left_finger_link:
+                                      {}
+                                  arm_left_robotiq_85_right_inner_knuckle_link:
+                                    arm_left_robotiq_85_right_finger_tip_link:
+                                      {}
+                                  arm_left_robotiq_85_right_knuckle_link:
+                                    arm_left_robotiq_85_right_finger_link:
+                                      {}
+                                  aruco_marker_link:
+                                    {}
+              arm_right_link_1_s:
+                arm_right_link_2_l:
+                  arm_right_link_3_e:
+                    arm_right_link_4_u:
+                      arm_right_link_5_r:
+                        arm_right_link_6_b:
+                          arm_right_link_7_t:
+                            arm_right_link_tool0:
+                              arm_right_coupler:
+                                arm_right_robotiq_85_base_link:
+                                  arm_right_robotiq_85_left_inner_knuckle_link:
+                                    arm_right_robotiq_85_left_finger_tip_link:
+                                      {}
+                                  arm_right_robotiq_85_left_knuckle_link:
+                                    arm_right_robotiq_85_left_finger_link:
+                                      {}
+                                  arm_right_robotiq_85_right_inner_knuckle_link:
+                                    arm_right_robotiq_85_right_finger_tip_link:
+                                      {}
+                                  arm_right_robotiq_85_right_knuckle_link:
+                                    arm_right_robotiq_85_right_finger_link:
+                                      {}
+      Update Interval: 0
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -593,25 +745,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 5.4230113
+      Distance: 3.35181117
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.633290172
-        Y: 0.216258198
-        Z: 0.411477953
+        X: -0.181058407
+        Y: 0.662021995
+        Z: 0.519407034
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.589797378
+      Pitch: 0.574796736
       Target Frame: world
       Value: Orbit (rviz)
-      Yaw: -0.278099895
+      Yaw: 5.50007629
     Saved: ~
 Window Geometry:
   Displays:

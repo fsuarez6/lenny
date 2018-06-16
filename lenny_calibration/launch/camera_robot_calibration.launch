@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- launch file parameters -->
+  <arg name="bag_path"/>
+
+  <!-- handeye calibration server -->
+  <node pkg="handeye" type="handeye_server.py" name="handeye_server"
+        output="screen"/>
+
+  <!-- camera_robot_calibration node -->
+  <node pkg="lenny_calibration" type="camera_robot_calibration.py"
+        name="camera_robot_calibration" output="screen"
+        args='--bag_path $(arg bag_path)'>
+    <param name="setup"         value="Fixed"/>
+    <param name="solver"        value="ParkBryan1994"/>
+    <param name="ref_frame"     value="torso_base_link"/>
+    <param name="cam_frame"     value="camera_optical_frame"/>
+  </node>
+</launch>

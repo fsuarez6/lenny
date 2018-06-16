@@ -33,8 +33,16 @@
               file="$(find lenny_moveit_config)/config/kinematics.yaml"/>
   </node>
 
-  <!-- handeye calibration server -->
-  <node pkg="handeye" type="handeye_server.py" name="handeye_server"
-        output="screen"/>
+  <!-- Capture poses node  -->
+  <node pkg="rqt_service_caller" type="rqt_service_caller"
+        name="rqt_service_caller"/>
 
+  <!-- Capture poses node  -->
+  <node pkg="lenny_calibration" type="capture_poses.py"
+        name="capture_poses" output="screen">
+    <param name="ref_frame" value="torso_base_link"/>
+    <param name="ee_link" value="arm_left_link_tool0"/>
+    <param name="marker_frame" value="marker_582"/>
+    <param name="cam_frame" value="camera_optical_frame"/>
+  </node>
 </launch>
