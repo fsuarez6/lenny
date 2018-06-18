@@ -5,6 +5,8 @@ find_package(catkin REQUIRED COMPONENTS
   openrave_catkin
 )
 
+catkin_python_setup()
+
 catkin_package()
 
 install(DIRECTORY data DESTINATION ${OpenRAVE_DEVEL_DIR})

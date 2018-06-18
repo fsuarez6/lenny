@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- launch file parameters -->
+  <arg name="paused"      default="false"/>
+  <arg name="debug"       default="false"/>
+  <arg name="gui"         default="false"/>
+  <arg name="rate"        default="125" />
+  <arg name="model"       value="lenny_calibration" />
+  <arg name="world_name"  value="$(find lenny_gazebo)/worlds/camera_robot_calibration.world" />
+
+  <!-- startup simulated world -->
+  <include file="$(find lenny_gazebo)/launch/robot_simulator.launch">
+    <arg name="world_name"  value="$(arg world_name)"/>
+    <arg name="paused"      value="$(arg paused)"/>
+    <arg name="model"       value="$(arg model)"/>
+    <arg name="debug"       value="$(arg debug)"/>
+    <arg name="gui"         value="$(arg gui)"/>
+  </include>
+
+  <!-- controllers -->
+  <include file="$(find lenny_control)/launch/controllers.launch"/>
+
+  <!-- move_group -->
+  <include file="$(find lenny_moveit_config)/launch/move_group.launch"/>
+
+  <!-- aruco marker detection -->
+  <include file="$(find lenny_calibration)/launch/marker_detection.launch"/>
+
+  <!-- rviz -->
+  <node pkg="rviz" type="rviz" name="$(anon rviz)"
+    args="-d $(find lenny_calibration)/config/calibration.rviz" output="screen">
+    <rosparam command="load"
+              file="$(find lenny_moveit_config)/config/kinematics.yaml"/>
+  </node>
+
+  <!-- Capture poses node  -->
+  <node pkg="rqt_service_caller" type="rqt_service_caller"
+        name="rqt_service_caller"/>
+
+  <!-- Capture poses node  -->
+  <node pkg="lenny_calibration" type="capture_poses.py"
+        name="capture_poses" output="screen">
+    <param name="ref_frame" value="torso_base_link"/>
+    <param name="ee_link" value="arm_left_link_tool0"/>
+    <param name="marker_frame" value="marker_582"/>
+    <param name="cam_frame" value="camera_optical_frame"/>
+  </node>
+</launch>

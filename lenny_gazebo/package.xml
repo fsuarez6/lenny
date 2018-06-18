@@ -17,5 +17,6 @@
   <exec_depend>gazebo_ros_control</exec_depend>
   <exec_depend>lenny_control</exec_depend>
   <exec_depend>motoman_sda10f_support</exec_depend>
+  <exec_depend>resource_retriever</exec_depend>
 
 </package>

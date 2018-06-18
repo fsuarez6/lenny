@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<kinbody name="plastic_bin">
+  <body name="plastic_bin">
+    <geom name="bottom" type="box">
+      <extents>0.125 0.125 0.005</extents>
+      <diffusecolor>0.6 0.6 0.6</diffusecolor>
+      <translation>0 0 0.005</translation>
+    </geom>
+    <geom name="left" type="box">
+      <extents>0.005 0.125 0.05</extents>
+      <diffusecolor>0.6 0.6 0.6</diffusecolor>
+      <translation>-0.13 0 0.05</translation>
+    </geom>
+    <geom name="right" type="box">
+      <extents>0.005 0.125 0.05</extents>
+      <diffusecolor>0.6 0.6 0.6</diffusecolor>
+      <translation>0.13 0 0.05</translation>
+    </geom>
+    <geom name="back" type="box">
+      <extents>0.135 0.005 0.1</extents>
+      <diffusecolor>0.6 0.6 0.6</diffusecolor>
+      <translation>0 0.13 0.1</translation>
+    </geom>
+    <geom name="front" type="box">
+      <extents>0.135 0.005 0.025</extents>
+      <diffusecolor>0.6 0.6 0.6</diffusecolor>
+      <translation>0 -0.13 0.025</translation>
+    </geom>
+  </body>
+</kinbody>

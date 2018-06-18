@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>lenny_openrave</name>
+  <name>lenny_calibration</name>
   <version>0.0.0</version>
-  <description>The lenny_openrave package</description>
+  <description>The lenny_calibration package</description>
 
   <author email="fsuarez6@gmail.com">Francisco Suarez-Ruiz</author>
   <maintainer email="fsuarez6@gmail.com">Francisco Suarez-Ruiz</maintainer>
@@ -11,12 +11,15 @@
   <url type="bugtracker">https://github.com/fsuarez6/lenny/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <depend>openrave_catkin</depend>
 
+  <depend>cv_bridge</depend>
+
+  <exec_depend>aruco_ros</exec_depend>
   <exec_depend>baldor</exec_depend>
   <exec_depend>criutils</exec_depend>
-  <exec_depend>motoman_sda10f_support</exec_depend>
-  <exec_depend>python-shapely</exec_depend>
-  <exec_depend>raveutils</exec_depend>
+  <exec_depend>handeye</exec_depend>
+  <exec_depend>rqt_service_caller</exec_depend>
+  <exec_depend>resource_retriever</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
 
 </package>
