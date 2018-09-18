@@ -16,9 +16,13 @@ Clone the required repositories:
 ```bash
 git clone https://github.com/fsuarez6/lenny.git
 git clone https://github.com/crigroup/handeye.git
+git clone https://github.com/crigroup/robotiq.git
 git clone https://github.com/crigroup/raveutils.git
+git clone https://github.com/crigroup/openrave_catkin.git
 git clone https://github.com/crigroup/cri_gazebo_plugins.git
 git clone https://github.com/pal-robotics/gazebo_ros_link_attacher.git
+git clone https://github.com/ros-industrial/motoman.git -b kinetic-devel
+git clone https://github.com/ros-industrial/industrial_core -b kinetic-devel
 ```
 
 Install any missing dependencies using rosdep:
@@ -38,7 +42,7 @@ Be sure to always source the appropriate ROS setup file, e.g:
 ```bash
 source ~/catkin_ws/devel/setup.bash
 ```
-You might want to add that line to your `~/.bashrc` file.
+You might want to add the line above to your `~/.bashrc` file.
 
 Try the following command:
 ```bash
