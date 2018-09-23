@@ -5,6 +5,10 @@ ROS packages for the lenny robot.
 ### Maintainer
 * [Francisco Suárez Ruiz](http://fsuarez6.github.io)
 
+## Requirements
+* ROS Kinetic: http://wiki.ros.org/kinetic/Installation
+* OpenRAVE: https://github.com/crigroup/openrave-installation
+
 ## Installation
 
 Go to your ROS working directory:
@@ -91,7 +95,9 @@ Output example:
 [INFO] [1529303561.602071, 322.758000]: 25 pose(s) have been written to: ~/.ros/2018-06-18-14-26-11-poses.bag
 ```
 
-Then, use the generated `rosbag` (`~/.ros/2018-06-18-14-26-11-poses.bag` in the example above) to perform the Handeye calibration:
+Then, use the generated `rosbag` (`~/.ros/2018-06-18-14-26-11-poses.bag` in the example above) to perform the Handeye
+calibration:
+
 ```bash
 roslaunch lenny_calibration camera_robot_calibration.launch           \
   bag_path:=~/.ros/2018-06-18-14-26-11-poses.bag
@@ -116,3 +122,41 @@ At time 13.735
             in RPY (radian) [3.142, -0.000, -1.571]
             in RPY (degree) [179.999, -0.000, -90.000]
 ```
+
+
+### Troubleshooting
+
+#### Gazebo doesn't load/start
+
+The first time you run `gazebo`, it downloads the default models from [this
+repo](https://bitbucket.org/osrf/gazebo_models/src/default/). Given that this repo is above 230 MB, it takes a while to
+download it. You could download the models before hand and place then in the default location `~/.gazebo/models`
+
+```bash
+wget https://bitbucket.org/osrf/gazebo_models/get/9533d5559309.zip -O gazebo_models.zip
+unzip gazebo_models.zip
+mv osrf-gazebo_models-9533d5559309 ~/.gazebo/models
+```
+
+You can test that gazebo is loading the default models with this command:
+
+```bash
+$ gzserver --verbose
+```
+```
+Gazebo multi-robot simulator, version 7.0.0
+Copyright (C) 2012-2016 Open Source Robotics Foundation.
+Released under the Apache 2 License.
+http://gazebosim.org
+
+[Msg] Waiting for master.
+[Msg] Connected to gazebo master @ http://127.0.0.1:11345
+[Msg] Publicized address: 172.17.0.2
+```
+
+If you get this message:
+```
+[Wrn] [ModelDatabase.cc:339] Getting models from[http://gazebosim.org/models/]. This may take a few seconds.
+```
+
+It means that gazebo cannot find the models and it's attempting to download them.
