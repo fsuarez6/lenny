@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<kinbody name="robotiq_c2">
+  <body name="robotiq_85_base_link">
+    <geom type="trimesh">
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <render>meshes/robotiq_c2/visual/robotiq_85_gripper_base.dae 1</render>
+      <collision>meshes/robotiq_c2/collision/robotiq_85_gripper_base.dae 1</collision>
+    </geom>
+  </body>
+  <!-- Links left finger -->
+  <body name="robotiq_85_left_knuckle_link">
+    <offsetfrom>robotiq_85_base_link</offsetfrom>
+    <translation>0.0306 0.04191 0</translation>
+    <geom type="trimesh">
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <translation>-0.0306 -0.04191 0</translation>
+      <render>meshes/robotiq_c2/visual/robotiq_85_gripper_joint_0_L.dae 1</render>
+      <collision>meshes/robotiq_c2/collision/robotiq_85_gripper_joint_0_L.dae 1</collision>
+    </geom>
+  </body>
+  <body name="robotiq_85_left_finger_link">
+    <offsetfrom>robotiq_85_left_knuckle_link</offsetfrom>
+    <translation>0.03134 -0.00508 0</translation>
+    <geom type="trimesh">
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <translation>-0.06194 -0.03683 0</translation>
+      <render>meshes/robotiq_c2/visual/robotiq_85_gripper_joint_1_L.dae 1</render>
+      <collision>meshes/robotiq_c2/collision/robotiq_85_gripper_joint_1_L.dae 1</collision>
+    </geom>
+  </body>
+  <body name="robotiq_85_left_inner_knuckle_link">
+    <offsetfrom>robotiq_85_base_link</offsetfrom>
+    <translation>0.0127 0.04843 0</translation>
+    <geom type="trimesh">
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <translation>-0.0127 -0.04843 0</translation>
+      <render>meshes/robotiq_c2/visual/robotiq_85_gripper_joint_2_L.dae 1</render>
+      <collision>meshes/robotiq_c2/collision/robotiq_85_gripper_joint_2_L.dae 1</collision>
+    </geom>
+  </body>
+  <body name="robotiq_85_left_finger_tip_link">
+    <offsetfrom>robotiq_85_left_inner_knuckle_link</offsetfrom>
+    <translation>0.0388 0.04196 0</translation>
+    <geom type="trimesh">
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <translation>-0.0515 -0.09039 0.</translation>
+        <render>meshes/robotiq_c2/visual/robotiq_85_gripper_joint_3_L.dae 1</render>
+        <collision>meshes/robotiq_c2/collision/robotiq_85_gripper_joint_3_L.dae 1</collision>
+    </geom>
+  </body>
+  <!-- Joints left finger -->
+  <joint name="robotiq_85_left_knuckle_joint" type="hinge" enable="true">
+    <body>robotiq_85_base_link</body>
+    <body>robotiq_85_left_knuckle_link</body>
+    <offsetfrom>robotiq_85_left_knuckle_link</offsetfrom>
+    <limits>0 0.8575</limits>
+    <axis>0 0 1</axis>
+  </joint>
+  <joint name="robotiq_85_left_finger_joint" type="hinge" enable="false">
+    <body>robotiq_85_left_knuckle_link</body>
+    <body>robotiq_85_left_finger_link</body>
+    <offsetfrom>robotiq_85_left_finger_link</offsetfrom>
+    <limits>0 0</limits>
+  </joint>
+  <joint name="robotiq_85_left_inner_knuckle_joint" type="hinge" enable="false" mimic_pos="robotiq_85_left_knuckle_joint" mimic_vel="|robotiq_85_left_knuckle_joint 1" mimic_accel="|robotiq_85_left_knuckle_joint 0">
+    <body>robotiq_85_base_link</body>
+    <body>robotiq_85_left_inner_knuckle_link</body>
+    <offsetfrom>robotiq_85_left_inner_knuckle_link</offsetfrom>
+    <axis>0 0 1</axis>
+  </joint>
+  <joint name="robotiq_85_left_finger_tip_joint" type="hinge" enable="false" mimic_pos="-robotiq_85_left_knuckle_joint" mimic_vel="|robotiq_85_left_knuckle_joint 1" mimic_accel="|robotiq_85_left_knuckle_joint 0">
+    <body>robotiq_85_left_inner_knuckle_link</body>
+    <body>robotiq_85_left_finger_tip_link</body>
+    <offsetfrom>robotiq_85_left_finger_tip_link</offsetfrom>
+    <axis>0 0 1</axis>
+  </joint>
+
+  <!-- Links right finger -->
+  <body name="robotiq_85_right_knuckle_link">
+    <offsetfrom>robotiq_85_base_link</offsetfrom>
+    <translation>-0.0306 0.04191 0</translation>
+    <geom type="trimesh">
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <translation>0.0306 -0.04191 0</translation>
+      <render>meshes/robotiq_c2/visual/robotiq_85_gripper_joint_0_R.dae 1</render>
+      <collision>meshes/robotiq_c2/collision/robotiq_85_gripper_joint_0_R.dae 1</collision>
+    </geom>
+  </body>
+  <body name="robotiq_85_right_finger_link">
+    <offsetfrom>robotiq_85_right_knuckle_link</offsetfrom>
+    <translation>-0.03134 -0.00508 0</translation>
+    <geom type="trimesh">
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <translation>0.06194 -0.03683 0</translation>
+      <render>meshes/robotiq_c2/visual/robotiq_85_gripper_joint_1_R.dae 1</render>
+      <collision>meshes/robotiq_c2/collision/robotiq_85_gripper_joint_1_R.dae 1</collision>
+    </geom>
+  </body>
+  <body name="robotiq_85_right_inner_knuckle_link">
+    <offsetfrom>robotiq_85_base_link</offsetfrom>
+    <translation>-0.0127 0.04843 0</translation>
+    <geom type="trimesh">
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <translation>0.0127 -0.04843 0</translation>
+      <render>meshes/robotiq_c2/visual/robotiq_85_gripper_joint_2_R.dae 1</render>
+      <collision>meshes/robotiq_c2/collision/robotiq_85_gripper_joint_2_R.dae 1</collision>
+    </geom>
+  </body>
+  <body name="robotiq_85_right_finger_tip_link">
+    <offsetfrom>robotiq_85_right_inner_knuckle_link</offsetfrom>
+    <translation>-0.0388 0.04196 0</translation>
+    <geom type="trimesh">
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <translation>0.0515 -0.09039 0.</translation>
+        <render>meshes/robotiq_c2/visual/robotiq_85_gripper_joint_3_R.dae 1</render>
+        <collision>meshes/robotiq_c2/collision/robotiq_85_gripper_joint_3_R.dae 1</collision>
+    </geom>
+  </body>
+  <!-- Joints left finger -->
+  <joint name="robotiq_85_right_knuckle_joint" type="hinge" enable="false" mimic_pos="-robotiq_85_left_knuckle_joint" mimic_vel="|robotiq_85_left_knuckle_joint 1" mimic_accel="|robotiq_85_left_knuckle_joint 0">
+    <body>robotiq_85_base_link</body>
+    <body>robotiq_85_right_knuckle_link</body>
+    <offsetfrom>robotiq_85_right_knuckle_link</offsetfrom>
+    <axis>0 0 1</axis>
+  </joint>
+  <joint name="robotiq_85_right_finger_joint" type="hinge" enable="false">
+    <body>robotiq_85_right_knuckle_link</body>
+    <body>robotiq_85_right_finger_link</body>
+    <offsetfrom>robotiq_85_right_finger_link</offsetfrom>
+    <limits>0 0</limits>
+  </joint>
+  <joint name="robotiq_85_right_inner_knuckle_joint" type="hinge" enable="false" mimic_pos="-robotiq_85_left_knuckle_joint" mimic_vel="|robotiq_85_left_knuckle_joint 1" mimic_accel="|robotiq_85_left_knuckle_joint 0">
+    <body>robotiq_85_base_link</body>
+    <body>robotiq_85_right_inner_knuckle_link</body>
+    <offsetfrom>robotiq_85_right_inner_knuckle_link</offsetfrom>
+    <axis>0 0 1</axis>
+  </joint>
+  <joint name="robotiq_85_right_finger_tip_joint" type="hinge" enable="false" mimic_pos="robotiq_85_left_knuckle_joint" mimic_vel="|robotiq_85_left_knuckle_joint 1" mimic_accel="|robotiq_85_left_knuckle_joint 0">
+    <body>robotiq_85_right_inner_knuckle_link</body>
+    <body>robotiq_85_right_finger_tip_link</body>
+    <offsetfrom>robotiq_85_right_finger_tip_link</offsetfrom>
+    <axis>0 0 1</axis>
+  </joint>
+
+  <!-- All the links are adjacent: https://gist.github.com/fsuarez6/6b39ee51eeb480acd2589087ad61cc59 -->
+  <adjacent>robotiq_85_base_link  robotiq_85_left_knuckle_link</adjacent>
+  <adjacent>robotiq_85_base_link  robotiq_85_right_knuckle_link</adjacent>
+  <adjacent>robotiq_85_base_link  robotiq_85_left_finger_link</adjacent>
+  <adjacent>robotiq_85_base_link  robotiq_85_right_finger_link</adjacent>
+  <adjacent>robotiq_85_base_link  robotiq_85_left_inner_knuckle_link</adjacent>
+  <adjacent>robotiq_85_base_link  robotiq_85_right_inner_knuckle_link</adjacent>
+  <adjacent>robotiq_85_base_link  robotiq_85_left_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_base_link  robotiq_85_right_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_left_knuckle_link  robotiq_85_right_knuckle_link</adjacent>
+  <adjacent>robotiq_85_left_knuckle_link  robotiq_85_left_finger_link</adjacent>
+  <adjacent>robotiq_85_left_knuckle_link  robotiq_85_right_finger_link</adjacent>
+  <adjacent>robotiq_85_left_knuckle_link  robotiq_85_left_inner_knuckle_link</adjacent>
+  <adjacent>robotiq_85_left_knuckle_link  robotiq_85_right_inner_knuckle_link</adjacent>
+  <adjacent>robotiq_85_left_knuckle_link  robotiq_85_left_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_left_knuckle_link  robotiq_85_right_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_right_knuckle_link  robotiq_85_left_finger_link</adjacent>
+  <adjacent>robotiq_85_right_knuckle_link  robotiq_85_right_finger_link</adjacent>
+  <adjacent>robotiq_85_right_knuckle_link  robotiq_85_left_inner_knuckle_link</adjacent>
+  <adjacent>robotiq_85_right_knuckle_link  robotiq_85_right_inner_knuckle_link</adjacent>
+  <adjacent>robotiq_85_right_knuckle_link  robotiq_85_left_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_right_knuckle_link  robotiq_85_right_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_left_finger_link  robotiq_85_right_finger_link</adjacent>
+  <adjacent>robotiq_85_left_finger_link  robotiq_85_left_inner_knuckle_link</adjacent>
+  <adjacent>robotiq_85_left_finger_link  robotiq_85_right_inner_knuckle_link</adjacent>
+  <adjacent>robotiq_85_left_finger_link  robotiq_85_left_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_left_finger_link  robotiq_85_right_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_right_finger_link  robotiq_85_left_inner_knuckle_link</adjacent>
+  <adjacent>robotiq_85_right_finger_link  robotiq_85_right_inner_knuckle_link</adjacent>
+  <adjacent>robotiq_85_right_finger_link  robotiq_85_left_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_right_finger_link  robotiq_85_right_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_left_inner_knuckle_link  robotiq_85_right_inner_knuckle_link</adjacent>
+  <adjacent>robotiq_85_left_inner_knuckle_link  robotiq_85_left_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_left_inner_knuckle_link  robotiq_85_right_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_right_inner_knuckle_link  robotiq_85_left_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_right_inner_knuckle_link  robotiq_85_right_finger_tip_link</adjacent>
+  <adjacent>robotiq_85_left_finger_tip_link  robotiq_85_right_finger_tip_link</adjacent>
+
+
+
+</kinbody>

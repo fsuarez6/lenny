@@ -160,3 +160,14 @@ If you get this message:
 ```
 
 It means that gazebo cannot find the models and it's attempting to download them.
+
+
+# CTAI Environment
+beacon
+conveyor
+feeder_table
+feeder_table_2
+mps
+table
+worktable
+xyz_robot
