@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="lenny">
+  <!-- Add the robot -->
+  <robot file="sda10f.robot.xml"></robot>
+
+  <!-- Add the left gripper -->
+  <kinbody file="robotiq_c2.robot.xml">
+    <rotationaxis>1 0 0 -90</rotationaxis>
+  </kinbody>
+
+  <!-- Attach the gripper to the robot -->
+  <kinbody>
+    <!-- This link (robotiq_85_base_link) already exists but you need to 'remind' OpenRAVE about it -->
+    <body name="robotiq_85_base_link">
+      <offsetfrom>arm_left_link_7_t</offsetfrom>
+      <translation>0 0 -0.01846</translation>
+    </body>
+    <joint name="robotiq_85_base_joint" type="hinge" enable="false">
+      <body>arm_left_link_7_t</body>
+      <body>robotiq_85_base_link</body>
+      <limits>0 0</limits>
+    </joint>
+  </kinbody>
+</robot>
