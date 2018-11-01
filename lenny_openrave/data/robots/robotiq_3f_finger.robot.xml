@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<kinbody name="robotiq_3f_finger">
+  <!-- Links  -->
+  <body name="link_0">
+    <translation>0.020 0 0</translation>
+    <geom type="trimesh">
+      <render>meshes/robotiq_3f/visual/link_0.stl 1</render>
+      <collision>meshes/robotiq_3f/collision/link_0.stl 1</collision>
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <transparency>0.0</transparency>
+    </geom>
+  </body>
+  <body name="link_1">
+    <offsetfrom>link_0</offsetfrom>
+    <translation>0.050 -0.028 0</translation>
+    <rotationaxis>0 0 1 -29.793735676</rotationaxis>
+    <geom type="trimesh">
+      <render>meshes/robotiq_3f/visual/link_1.stl 1</render>
+      <collision>meshes/robotiq_3f/collision/link_1.stl 1</collision>
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <transparency>0.0</transparency>
+    </geom>
+  </body>
+  <body name="link_2">
+    <offsetfrom>link_1</offsetfrom>
+    <translation>0.039 0 0.0075</translation>
+    <geom type="trimesh">
+      <render>meshes/robotiq_3f/visual/link_2.stl 1</render>
+      <collision>meshes/robotiq_3f/collision/link_2.stl 1</collision>
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <transparency>0.0</transparency>
+    </geom>
+  </body>
+  <body name="link_3">
+    <offsetfrom>link_2</offsetfrom>
+    <translation>0 0 -0.0075</translation>
+    <rotationaxis>0 0 1 29.793735676</rotationaxis>
+    <geom type="trimesh">
+      <render>meshes/robotiq_3f/visual/link_3.stl 1</render>
+      <collision>meshes/robotiq_3f/collision/link_3.stl 1</collision>
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <transparency>0.0</transparency>
+    </geom>
+  </body>
+  <!-- Joints  -->
+  <joint name="joint_1" type="hinge" enable="false">
+    <body>link_0</body>
+    <body>link_1</body>
+    <offsetfrom>link_1</offsetfrom>
+    <limits>0 0</limits>
+  </joint>
+  <joint name="joint_2" type="hinge" enable="false">
+    <body>link_1</body>
+    <body>link_2</body>
+    <offsetfrom>link_2</offsetfrom>
+    <limits>0 0</limits>
+  </joint>
+  <joint name="joint_3" type="hinge" enable="false">
+    <body>link_2</body>
+    <body>link_3</body>
+    <offsetfrom>link_3</offsetfrom>
+    <limits>0 0</limits>
+  </joint>
+</kinbody>

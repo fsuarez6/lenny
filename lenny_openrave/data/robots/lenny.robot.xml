@@ -7,10 +7,8 @@
   <kinbody file="robotiq_c2.robot.xml">
     <rotationaxis>1 0 0 -90</rotationaxis>
   </kinbody>
-
-  <!-- Attach the gripper to the robot -->
   <kinbody>
-    <!-- This link (robotiq_85_base_link) already exists but you need to 'remind' OpenRAVE about it -->
+    <!-- We need to do forward declaration for: robotiq_85_base_link -->
     <body name="robotiq_85_base_link">
       <offsetfrom>arm_left_link_7_t</offsetfrom>
       <translation>0 0 -0.01846</translation>
@@ -18,6 +16,25 @@
     <joint name="robotiq_85_base_joint" type="hinge" enable="false">
       <body>arm_left_link_7_t</body>
       <body>robotiq_85_base_link</body>
+      <limits>0 0</limits>
+    </joint>
+  </kinbody>
+
+  <!-- Add the right gripper -->
+  <kinbody file="robotiq_3f.robot.xml" prefix="robotiq_3f_">
+    <rotationaxis>1 0 0 -90</rotationaxis>
+    <rotationaxis>0 0 1 -90</rotationaxis>
+  </kinbody>
+  <kinbody>
+    <!-- We need to do forward declaration for: robotiq_3f_palm -->
+    <body name="robotiq_3f_palm">
+      <offsetfrom>arm_right_link_7_t</offsetfrom>
+      <translation>0 0 -0.064</translation>
+    </body>
+    <joint name="robotiq_3f_base_joint" type="hinge" enable="false">
+      <body>arm_right_link_7_t</body>
+      <body>robotiq_3f_palm</body>
+      <offsetfrom>robotiq_3f_palm</offsetfrom>
       <limits>0 0</limits>
     </joint>
   </kinbody>

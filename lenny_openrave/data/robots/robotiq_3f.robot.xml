@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<kinbody name="robotiq_3f_gripper">
+  <!-- Palm -->
+  <body name="palm">
+    <geom type="trimesh">
+      <render>meshes/robotiq_3f/visual/palm.stl 1</render>
+      <collision>meshes/robotiq_3f/collision/palm.stl 1</collision>
+      <diffusecolor>0.2 0.2 0.2</diffusecolor>
+      <transparency>0.0</transparency>
+    </geom>
+  </body>
+  <!-- Fingers -->
+  <kinbody file="robotiq_3f_finger.robot.xml" prefix="finger_1_">
+    <offsetfrom>palm</offsetfrom>
+    <translation>-0.0455 0.0214 0.036</translation>
+    <rotationaxis>0 1 0 180</rotationaxis>
+    <rotationaxis>0 0 1 -90</rotationaxis>
+  </kinbody>
+  <kinbody file="robotiq_3f_finger.robot.xml" prefix="finger_2_">
+    <offsetfrom>palm</offsetfrom>
+    <translation>-0.0455 0.0214 -0.036</translation>
+    <rotationaxis>0 1 0 180</rotationaxis>
+    <rotationaxis>0 0 1 -90</rotationaxis>
+  </kinbody>
+  <kinbody file="robotiq_3f_finger.robot.xml" prefix="finger_middle_">
+    <offsetfrom>palm</offsetfrom>
+    <translation>0.0455 0.0214 0</translation>
+    <rotationaxis>0 0 1 90</rotationaxis>
+  </kinbody>
+  <!-- Joints -->
+  <joint name="palm_finger_1_joint" type="hinge" enable="false">
+    <body>palm</body>
+    <body>finger_1_link_0</body>
+    <offsetfrom>finger_1_link_0</offsetfrom>
+    <axis>0 0 1</axis>
+    <limits>0 0</limits>
+  </joint>
+  <joint name="palm_finger_2_joint" type="hinge" enable="false">
+    <body>palm</body>
+    <body>finger_2_link_0</body>
+    <offsetfrom>finger_2_link_0</offsetfrom>
+    <axis>0 0 1</axis>
+    <limits>0 0</limits>
+  </joint>
+  <joint name="palm_finger_middle_joint" type="hinge" enable="false">
+    <body>palm</body>
+    <body>finger_middle_link_0</body>
+    <offsetfrom>finger_middle_link_0</offsetfrom>
+    <axis>0 0 1</axis>
+    <limits>0 0</limits>
+  </joint>
+</kinbody>

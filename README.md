@@ -46,6 +46,7 @@ Be sure to always source the appropriate ROS setup file, e.g:
 ```bash
 source ~/catkin_ws/devel/setup.bash
 ```
+
 You might want to add the line above to your `~/.bashrc` file.
 
 Try the following command:
@@ -56,22 +57,26 @@ roslaunch lenny_moveit_config demo.launch
 ## Examples
 
 ### Visualization in RViz
+
 ```bash
 roslaunch lenny_gazebo test_robot_model.launch
 ```
 
 ### ROS-Industrial robot simulator
+
 ```bash
 roslaunch lenny_control robot_interface_simulator.launch
 rviz -d `rospack find lenny_gazebo`/config/robot_state.rviz
 ```
 
 ### Simulation in Gazebo
+
 ```bash
 roslaunch lenny_gazebo robot_simulator.launch
 ```
 
 ### Bimanual motion planning
+
 ```bash
 roslaunch lenny_gazebo robot_simulator.launch
 roslaunch lenny_control controllers.launch
@@ -79,6 +84,7 @@ rosrun lenny_openrave example_bimanual_planning.py
 ```
 
 ### Bimanual trajectory execution
+
 ```bash
 roslaunch lenny_control robot_interface_simulator.launch
 rviz -d `rospack find lenny_gazebo`/config/robot_state.rviz
@@ -86,10 +92,12 @@ rosrun lenny_control example_trajectory_controller.py
 ```
 
 ### Camera-robot calibration
+
 First, capture the calibration poses. A good amount of calibration poses is 25:
 ```bash
 roslaunch lenny_calibration capture_poses.launch gui:=false
 ```
+
 Output example:
 ```
 [INFO] [1529303561.602071, 322.758000]: 25 pose(s) have been written to: ~/.ros/2018-06-18-14-26-11-poses.bag
@@ -102,6 +110,7 @@ calibration:
 roslaunch lenny_calibration camera_robot_calibration.launch           \
   bag_path:=~/.ros/2018-06-18-14-26-11-poses.bag
 ```
+
 Expected output:
 ```
 [INFO] [1529304246.283849]: Calibration has been written to: ~/ws_lenny/src/lenny/lenny_calibration/config/camera_robot_calibration.yaml
@@ -114,6 +123,7 @@ rosrun tf static_transform_publisher 0 0 0.035 -1.5708 0 -1.5708              \
   openni_kinect camera_optical_frame 100
 rosrun tf tf_echo torso_base_link camera_optical_frame
 ```
+
 Example output:
 ```
 At time 13.735
@@ -139,11 +149,9 @@ mv osrf-gazebo_models-9533d5559309 ~/.gazebo/models
 ```
 
 You can test that gazebo is loading the default models with this command:
-
-```bash
+```
 $ gzserver --verbose
-```
-```
+
 Gazebo multi-robot simulator, version 7.0.0
 Copyright (C) 2012-2016 Open Source Robotics Foundation.
 Released under the Apache 2 License.
@@ -163,6 +171,7 @@ It means that gazebo cannot find the models and it's attempting to download them
 
 
 # CTAI Environment
+
 beacon
 conveyor
 feeder_table
