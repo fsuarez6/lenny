@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot name="lenny">
   <!-- Add the robot -->
-  <robot file="sda10f.robot.xml"></robot>
+  <robot file="sda10f.robot.xml"/>
 
   <!-- Add the left gripper -->
   <kinbody file="robotiq_c2.robot.xml">
-    <rotationaxis>1 0 0 -90</rotationaxis>
-  </kinbody>
-  <kinbody>
     <!-- We need to do forward declaration for: robotiq_85_base_link -->
     <body name="robotiq_85_base_link">
       <offsetfrom>arm_left_link_7_t</offsetfrom>
+      <rotationaxis>1 0 0 -90</rotationaxis>
+      <rotationaxis>0 0 1 135</rotationaxis>
       <translation>0 0 -0.01846</translation>
     </body>
     <joint name="robotiq_85_base_joint" type="hinge" enable="false">
@@ -22,19 +21,16 @@
 
   <!-- Add the right gripper -->
   <kinbody file="robotiq_3f.robot.xml" prefix="robotiq_3f_">
-    <rotationaxis>1 0 0 -90</rotationaxis>
-    <rotationaxis>0 0 1 -90</rotationaxis>
-  </kinbody>
-  <kinbody>
     <!-- We need to do forward declaration for: robotiq_3f_palm -->
     <body name="robotiq_3f_palm">
       <offsetfrom>arm_right_link_7_t</offsetfrom>
+      <rotationaxis>1 0 0 -90</rotationaxis>
+      <rotationaxis>0 0 1 -90</rotationaxis>
       <translation>0 0 -0.064</translation>
     </body>
     <joint name="robotiq_3f_base_joint" type="hinge" enable="false">
       <body>arm_right_link_7_t</body>
       <body>robotiq_3f_palm</body>
-      <offsetfrom>robotiq_3f_palm</offsetfrom>
       <limits>0 0</limits>
     </joint>
   </kinbody>

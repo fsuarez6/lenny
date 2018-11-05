@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<kinbody name="table">
+  <body name="table_link">
+    <translation>-0.615 0 -0.76</translation>
+    <geom type="trimesh">
+      <data>meshes/ctai_table.stl 1</data>
+      <diffusecolor>0.976470588 0.88627451 0.82745098</diffusecolor>
+    </geom>
+  </body>
+</kinbody>

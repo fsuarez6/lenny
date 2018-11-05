@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<kinbody name="conveyor">
+  <body name="conveyor_link">
+    <geom type="trimesh">
+      <data>meshes/ctai_conveyor.stl 0.01</data>
+      <diffusecolor>0.94 0.94 0.94</diffusecolor>
+    </geom>
+  </body>
+</kinbody>

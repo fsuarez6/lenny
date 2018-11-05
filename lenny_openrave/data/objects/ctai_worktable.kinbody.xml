@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<kinbody name="worktable">
+  <body name="worktable_link">
+    <translation>-0.625 0 0</translation>
+    <geom type="trimesh">
+      <data>meshes/ctai_worktable.stl 0.001</data>
+      <diffusecolor>0.176470588 0.529411765 0.584313725</diffusecolor>
+    </geom>
+  </body>
+</kinbody>

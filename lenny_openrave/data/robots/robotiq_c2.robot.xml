@@ -180,6 +180,4 @@
   <adjacent>robotiq_85_right_inner_knuckle_link  robotiq_85_right_finger_tip_link</adjacent>
   <adjacent>robotiq_85_left_finger_tip_link  robotiq_85_right_finger_tip_link</adjacent>
 
-
-
 </kinbody>

@@ -46,19 +46,16 @@
   <joint name="joint_1" type="hinge" enable="false">
     <body>link_0</body>
     <body>link_1</body>
-    <offsetfrom>link_1</offsetfrom>
     <limits>0 0</limits>
   </joint>
   <joint name="joint_2" type="hinge" enable="false">
     <body>link_1</body>
     <body>link_2</body>
-    <offsetfrom>link_2</offsetfrom>
     <limits>0 0</limits>
   </joint>
   <joint name="joint_3" type="hinge" enable="false">
     <body>link_2</body>
     <body>link_3</body>
-    <offsetfrom>link_3</offsetfrom>
     <limits>0 0</limits>
   </joint>
 </kinbody>

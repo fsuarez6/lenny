@@ -28,25 +28,26 @@
     <rotationaxis>0 0 1 90</rotationaxis>
   </kinbody>
   <!-- Joints -->
-  <joint name="palm_finger_1_joint" type="hinge" enable="false">
+  <joint name="palm_finger_1_joint" type="hinge">
     <body>palm</body>
     <body>finger_1_link_0</body>
     <offsetfrom>finger_1_link_0</offsetfrom>
     <axis>0 0 1</axis>
     <limits>0 0</limits>
   </joint>
-  <joint name="palm_finger_2_joint" type="hinge" enable="false">
+  <joint name="palm_finger_2_joint" type="hinge">
     <body>palm</body>
     <body>finger_2_link_0</body>
     <offsetfrom>finger_2_link_0</offsetfrom>
     <axis>0 0 1</axis>
     <limits>0 0</limits>
   </joint>
-  <joint name="palm_finger_middle_joint" type="hinge" enable="false">
+  <joint name="palm_finger_middle_joint" type="hinge">
     <body>palm</body>
     <body>finger_middle_link_0</body>
     <offsetfrom>finger_middle_link_0</offsetfrom>
     <axis>0 0 1</axis>
     <limits>0 0</limits>
   </joint>
+  <!-- TODO: Add adjacent links: https://gist.github.com/fsuarez6/6b39ee51eeb480acd2589087ad61cc59 -->
 </kinbody>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<kinbody name="mps">
+  <body name="mps_link">
+    <translation>-0.7 0 -1.40</translation>
+    <geom type="trimesh">
+      <data>meshes/ctai_mps.stl 1</data>
+      <diffusecolor>0.1254902 0.69803922 0.66666667</diffusecolor>
+    </geom>
+  </body>
+</kinbody>
