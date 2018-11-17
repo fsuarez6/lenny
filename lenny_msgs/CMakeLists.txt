@@ -9,7 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 add_message_files(
     FILES
-    BottleDetection.srv
+    BottleDetection.msg
+    BottleDetectionArray.msg
 )
 
 add_service_files(
