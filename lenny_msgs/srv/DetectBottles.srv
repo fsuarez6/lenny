@@ -1,0 +1,5 @@
+# Empty request
+---
+lenny_msgs/BottleDetection[]    bottles
+bool                            success
+string                          message

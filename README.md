@@ -56,6 +56,14 @@ roslaunch lenny_moveit_config demo.launch
 
 ## Examples
 
+### Bottle picker
+
+```bash
+roscore
+rosrun lenny_openrave fake_bottle_detection.py --num-bottles=10
+rosrun lenny_openrave bottle_picker.py
+```
+
 ### Visualization in RViz
 
 ```bash

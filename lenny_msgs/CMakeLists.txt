@@ -10,11 +10,11 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
     FILES
     BottleDetection.msg
-    BottleDetectionArray.msg
 )
 
 add_service_files(
     FILES
+    DetectBottles.srv
     SetActiveJoints.srv
 )
 

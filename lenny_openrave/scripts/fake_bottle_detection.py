@@ -4,7 +4,6 @@ import rospy
 import random
 import tf2_ros
 import argparse
-import threading
 import numpy as np
 import baldor as br
 import criutils as cu
@@ -12,7 +11,7 @@ import openravepy as orpy
 # Messages and services
 from geometry_msgs.msg import Vector3
 from lenny_msgs.msg import BottleDetection, BottleDetectionArray
-from std_srvs.srv import Trigger, TriggerRequest, TriggerResponse
+from lenny_msgs.srv import DetectBottles, DetectBottlesResponse
 
 
 # Bottles types and dimensions
@@ -36,23 +35,18 @@ MAX_PLACEMENT_ATTEMPTS = 100
 
 class FakeBottleDetection(object):
     def __init__(self, num_bottles):
-        # Thread locking
-        self.mutex = threading.Lock()
         # Setup services and topics
-        self.shuffle_srv = rospy.Service('fake_bottle_detection/shuffle', Trigger, self.cb_shuffle)
-        self.bottles_pub = rospy.Publisher('bottle_detection', BottleDetectionArray, queue_size=1)
+        self.shuffle_srv = rospy.Service('bottle_detection/update', DetectBottles, self.cb_detect)
         # Working objects
         self.num_bottles = num_bottles
-        self.msg = BottleDetectionArray()
-        self.msg.bottles = [BottleDetection(parent_frame_id="worktable", score=1.0) for _ in range(self.num_bottles)]
-        self.cb_shuffle(TriggerRequest())
 
-    def cb_shuffle(self, request):
-        self.mutex.acquire()
-        response = TriggerResponse(success=True)
+    def cb_detect(self, request):
+        response = DetectBottlesResponse(success=True)
         entities = []
         invalid_bottles = set()
+        stamp = rospy.Time.now()
         for i in range(self.num_bottles):
+            bottle = BottleDetection(parent_frame_id="worktable", score=1.0)
             attempt = 0
             valid_bottle = False
             while (not valid_bottle) and attempt < MAX_PLACEMENT_ATTEMPTS:
@@ -65,10 +59,9 @@ class FakeBottleDetection(object):
                 else:
                     rospy.logwarn("Unknown bottle type: {}".format(bottle_type))
                     break
-                # TODO: Improve the placement and collision checking
                 # Find a valid collision-free placement
                 new_pos = (2*np.random.rand(2)-1) * WORKTABLE_EXTENTS
-                new_radius = np.max(bbox) / 2.
+                new_radius = np.linalg.norm(bbox[:2]) / 2.
                 if np.any(new_radius+np.abs(new_pos) > WORKTABLE_EXTENTS):
                     # Part of the bottle is outside of the table.
                     continue
@@ -87,27 +80,20 @@ class FakeBottleDetection(object):
                 invalid_bottles.add(i)
                 continue
             entities.append((new_pos, new_radius))
-            self.msg.bottles[i].bottle_type = bottle_type
-            self.msg.bottles[i].frame_id = "bottle_{0:02d}".format(i+1)
-            self.msg.bottles[i].bbox_size = Vector3(*bbox)
+            bottle.header.stamp = stamp
+            bottle.bottle_type = bottle_type
+            bottle.frame_id = "bottle_{0:02d}".format(i+1)
+            bottle.bbox_size = Vector3(*bbox)
             # Add 0.1 mm to avoid collisions with the worktable
-            self.msg.bottles[i].transform.translation = Vector3(new_pos[0], new_pos[1], bbox[2]/2.+1e-4)
+            bottle.transform.translation = Vector3(new_pos[0], new_pos[1], bbox[2]/2.+1e-4)
             # Generate a random orientation (yaw)
             quat = br.euler.to_quaternion(0, 0, 2*np.pi*random.random())
-            self.msg.bottles[i].transform.rotation = cu.conversions.to_quaternion(quat)
+            bottle.transform.rotation = cu.conversions.to_quaternion(quat)
+            response.bottles.append(bottle)
         # Done
-        self.mutex.release()
-        if response.success:
-            response.message = "Shuffled {} bottles".format(self.num_bottles - len(invalid_bottles))
+        response.message = "Detected {} bottles".format(self.num_bottles - len(invalid_bottles))
+        rospy.loginfo(response.message)
         return response
-
-    def execute(self, rate=10):
-        ros_rate = rospy.Rate(rate)
-        while not rospy.is_shutdown():
-            ros_rate.sleep()
-            with self.mutex:
-                self.msg.header.stamp = rospy.Time.now()
-                self.bottles_pub.publish(self.msg)
 
 
 def parse_args():
@@ -123,11 +109,9 @@ def parse_args():
             help="If set, will show additional debugging information")
     parser.add_argument("--ipython", action="store_true",
             help="If set, will embed an IPython console. Useful for debugging")
-    parser.add_argument("--rate", metavar="", type=float, default=5.0,
-            help="Rate to publish the fake bottle detection info. default=%(default).1f'")
     parser.add_argument("--num-bottles", metavar="", type=int, default=10,
-            help="Rate to publish the fake bottle detection info. default=%(default)d'")
-    return parser.parse_args(rospy.myargv()[1:])
+            help="Number of bottles to be generated. default=%(default)d")
+    return parser.parse_args(clean_argv)
 
 
 if "__main__" == __name__:
@@ -137,4 +121,5 @@ if "__main__" == __name__:
     node_name = os.path.splitext(os.path.basename(__file__))[0]
     rospy.init_node(node_name, log_level=log_level)
     detection = FakeBottleDetection(options.num_bottles)
-    detection.execute(options.rate)
+    rospy.loginfo("Started node: {}".format(node_name))
+    rospy.spin()
