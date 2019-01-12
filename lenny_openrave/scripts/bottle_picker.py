@@ -3,11 +3,20 @@ import rospy
 import numpy as np
 import baldor as br
 import criutils as cu
+import raveutils as ru
 import openravepy as orpy
 import openravepy as orpy
 # Messages
 from lenny_msgs.msg import BottleDetection
 from lenny_msgs.srv import DetectBottles, DetectBottlesResponse
+
+COLORS = {
+    BottleDetection.PET_COLOR: [0.98, 0.85, 0.37, 1.],
+    BottleDetection.PET_TRANSPARENT: [0.9, 0.9, 0.9, 0.5],
+    BottleDetection.HDPE_COLOR: [0.80392157, 0.36078431, 0.36078431, 1.],
+    BottleDetection.HDPE_WHITE: [1., 0.98, 0.98, 1.],
+}
+
 
 class BottleManager(object):
     def __init__(self, env, srv_name="/bottle_detection/update"):
@@ -63,6 +72,8 @@ class BottleManager(object):
                     boxes = np.zeros(6)
                     boxes[3:] = cu.conversions.from_vector3(bottle.bbox_size) / 2.
                     body.InitFromBoxes(boxes.reshape(1,6), draw=True)
+                    ru.body.set_body_color(body, COLORS[bottle.bottle_type][:3])
+                    ru.body.set_body_transparency(body, 1.-COLORS[bottle.bottle_type][3])
                     body.SetTransform(Tbody)
                     self.env.Add(body)
         # Remove orphan bottles

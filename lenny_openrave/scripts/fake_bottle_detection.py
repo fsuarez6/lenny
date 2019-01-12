@@ -10,7 +10,7 @@ import criutils as cu
 import openravepy as orpy
 # Messages and services
 from geometry_msgs.msg import Vector3
-from lenny_msgs.msg import BottleDetection, BottleDetectionArray
+from lenny_msgs.msg import BottleDetection
 from lenny_msgs.srv import DetectBottles, DetectBottlesResponse
 
 
