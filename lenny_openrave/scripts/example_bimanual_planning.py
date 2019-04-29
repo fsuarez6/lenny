@@ -5,7 +5,7 @@ import criutils as cu
 import raveutils as ru
 import openravepy as orpy
 # Controller
-from lenny_control.controllers import TrajectoryController
+from lenny_control.trajectory import TrajectoryController
 
 
 rospy.init_node('example_bimanual_exe')
