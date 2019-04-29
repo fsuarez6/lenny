@@ -66,7 +66,6 @@ class BottleManager(object):
                         self.env.Remove(existing_body)
                 self.exiting_bottles[bottle.frame_id] = bottle.bottle_type
                 with self.env:
-                    # TODO: Change the bottle color
                     body = orpy.RaveCreateKinBody(self.env, "")
                     body.SetName(bottle.frame_id)
                     boxes = np.zeros(6)

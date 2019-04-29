@@ -22,8 +22,7 @@ class BimanualPlanner(object):
         self.torso_joint = None
 
     def _estimate_arm_lenght(self, manip):
-        joints = [j for j in self.robot.GetDependencyOrderedJoints()
-                  if j.GetJointIndex() in manip.GetArmIndices()]
+        joints = [j for j in self.robot.GetDependencyOrderedJoints() if j.GetJointIndex() in manip.GetArmIndices()]
         anchor = joints[0].GetAnchor()
         eetrans = manip.GetEndEffectorTransform()[0:3, 3]
         armlength = 0
@@ -48,8 +47,7 @@ class BimanualPlanner(object):
         angle = np.arctan2(y, x)
         return angle
 
-    def find_closest_config_index(self, configurations, joint_indices=None,
-                                  metric_fn=None, weights=None):
+    def find_closest_config_index(self, configurations, joint_indices=None, metric_fn=None, weights=None):
         if joint_indices is None:
             joint_indices = np.hstack((self.left_indices, self.right_indices))
         if metric_fn is None:
@@ -66,8 +64,7 @@ class BimanualPlanner(object):
                 best_idx = i
         return best_idx
 
-    def find_ik_solutions(self, Tleft, Tright, collision_free=True,
-                          lazy_check=False):
+    def find_ik_solutions(self, Tleft, Tright, collision_free=True, lazy_check=False):
         # Lazy check for reachability
         if lazy_check:
             reach_left = self.lazy_reachability_check(self.left_manip, Tleft[:3, 3])
@@ -77,13 +74,11 @@ class BimanualPlanner(object):
         solutions = []
         # IKFast for the left arm
         self.robot.SetActiveManipulator(self.left_manip)
-        left_sols = ru.kinematics.find_ik_solutions(self.robot, Tleft,
-                                                    self.iktype, collision_free=collision_free)
+        left_sols = ru.kinematics.find_ik_solutions(self.robot, Tleft, self.iktype, collision_free=collision_free)
         if len(left_sols) > 0:
             # IKFast for the right arm
             self.robot.SetActiveManipulator(self.right_manip)
-            right_sols = ru.kinematics.find_ik_solutions(self.robot, Tright,
-                                                         self.iktype, collision_free=collision_free)
+            right_sols = ru.kinematics.find_ik_solutions(self.robot, Tright, self.iktype, collision_free=collision_free)
             if len(right_sols) > 0:
                 # The solutions list is the combinations of left and right sols
                 with self.robot:
@@ -144,8 +139,7 @@ class BimanualPlanner(object):
         manipulators = [self.left_manip, self.right_manip]
         if None not in manipulators:
             for manip in manipulators:
-                ikmodel = InverseKinematicsModel(self.robot, iktype=self.iktype,
-                                                 manip=manip)
+                ikmodel = InverseKinematicsModel(self.robot, iktype=self.iktype, manip=manip)
                 success = ikmodel.load(freeinc=[freeinc])
                 if not success:
                     break

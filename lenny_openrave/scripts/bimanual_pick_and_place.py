@@ -7,13 +7,13 @@ import collections
 import numpy as np
 import baldor as br
 import criutils as cu
-# import networkx as nx
+import networkx as nx
 import raveutils as ru
-# import robotsp as rtsp
-# import lkh_solver as lkh
+import robotsp as rtsp
+import lkh_solver as lkh
 import openravepy as orpy
 # Bimanual planner
-# from lenny_openrave.bimanual import BimanualPlanner
+from lenny_openrave.bimanual import BimanualPlanner
 
 
 @enum.unique
@@ -226,6 +226,9 @@ params.runs = 3
 params.special = True
 lkh.parser.write_tsplib(params.problem_file, graph, params, nodelist=nodelist, demand=demand, capacity=2, depot=0)
 tour, info = lkh.solver.lkh_solver(params)
+
+import IPython
+IPython.embed(banner1="")
 
 """
 # Reduce the velocity limits
