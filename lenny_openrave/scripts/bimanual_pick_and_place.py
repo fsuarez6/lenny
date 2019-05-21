@@ -200,7 +200,7 @@ for i, j in itertools.combinations(cubeid_list, 2):
         configs[:, 0] = qtorso
         configs[:, 1:] = solutions
         # Update the TSP graph
-        graph.add_edge(i, j, weight=0, configs=configs)     # Cubes
+        graph.add_edge(i, j, weight=0, configs=configs)         # Cubes
         graph.add_edge(i + num_cubes, j + num_cubes, weight=0)  # Bins
 # Populate the demand matrix
 nodelist = sorted(graph.nodes())
