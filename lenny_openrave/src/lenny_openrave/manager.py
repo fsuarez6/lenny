@@ -13,7 +13,7 @@ from lenny_msgs.srv import DetectBottles, DetectBottlesResponse
 class BottleManager(object):
     COLORS = {
         BottleDetection.PET_COLOR: [0.98, 0.85, 0.37, 1.],
-        BottleDetection.PET_TRANSPARENT: [0.9, 0.9, 0.9, 0.5],
+        # BottleDetection.PET_TRANSPARENT: [0.5, 0.5, 0.5, 1.],
         BottleDetection.HDPE_COLOR: [0.80392157, 0.36078431, 0.36078431, 1.],
         BottleDetection.HDPE_WHITE: [1., 0.98, 0.98, 1.],
     }
@@ -23,9 +23,45 @@ class BottleManager(object):
         rospy.loginfo("Waiting for service: {}".format(srv_name))
         self.detect_srv.wait_for_service()
         # Working entities
+        self.changed = False
         self.env = env
-        self.existing_bottles = dict() # keys: bottle_name, values: bottle_type
+        self.bins = self._add_bins()    # keys: bin_name, values: bin_type
+        self.existing_bottles = dict()  # keys: bottle_name, values: bottle_type
         rospy.loginfo("Bottle manager successfully initialized")
+    
+    def _add_bins(self):
+        bins_table = self.env.GetKinBody("bins_table")
+        aabb = bins_table.ComputeAABB()
+        xdim, _, zdim = 2 * aabb.extents()
+        Tabove_table = bins_table.GetTransform()
+        Tabove_table[:3, 3] += [0, -0.1, zdim + br._EPS]
+        offset = xdim / 2. - 0.175
+        direction = Tabove_table[:3, 0]
+        placements = [-1., 0, 1.]
+        num = 1
+        bins = dict()
+        for placement, (color_name, color_value) in zip(placements, self.COLORS.items()):
+            body = self.env.ReadKinBodyXMLFile("objects/plastic_bin.kinbody.xml")
+            Tbody = np.array(Tabove_table)
+            Tbody[:3, 3] += offset * direction * placement
+            bin_name = "bin_{0:02d}".format(num)
+            with self.env:
+                body.SetName(bin_name)
+                self.env.Add(body)
+                body.SetTransform(Tbody)
+            ru.body.set_body_color(body, diffuse=color_value)
+            bins[bin_name] = color_name
+            num += 1
+        return bins
+
+    def get_bins(self):
+        return self.bins
+
+    def get_bottles(self):
+        return self.existing_bottles
+
+    def has_changed(self):
+        return self.changed
 
     def update(self):
         response = DetectBottlesResponse(success=False)
@@ -36,9 +72,10 @@ class BottleManager(object):
         if not response.success:
             return
         # Add the new bottles
-        new_bottles = set()
+        self.changed = False
+        newexisting_bottles = set()
         for bottle in response.bottles:
-            new_bottles.add(bottle.frame_id)
+            newexisting_bottles.add(bottle.frame_id)
             parent_body = self.env.GetKinBody(bottle.parent_frame_id)
             if parent_body is None:
                 rospy.logwarn("Failed to find parent_frame_id for: {}".format(bottle.frame_id))
@@ -60,6 +97,7 @@ class BottleManager(object):
                     with self.env:
                         existing_body.SetTransform(Tbody)
             if add_new_bottle:
+                self.changed = True
                 if existing_body is not None:
                     with self.env:
                         self.env.Remove(existing_body)
@@ -75,5 +113,9 @@ class BottleManager(object):
                     body.SetTransform(Tbody)
                     self.env.Add(body)
         # Remove orphan bottles
-        orphan_bottles = set(self.existing_bottles.keys()).difference(new_bottles)
-        [self.env.Remove(orphan) for orphan in orphan_bottles]
+        orphanexisting_bottles = set(self.existing_bottles.keys()).difference(newexisting_bottles)
+        for orphan in orphanexisting_bottles:
+            try:
+                self.env.Remove(orphan)
+            except:
+                pass

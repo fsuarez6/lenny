@@ -15,11 +15,12 @@ from lenny_msgs.srv import DetectBottles, DetectBottlesResponse
 
 
 # Bottles types and dimensions
-PET_TYPES = [BottleDetection.PET_COLOR, BottleDetection.PET_TRANSPARENT]
+PET_TYPES = [BottleDetection.PET_COLOR]
 PET_DIMENSIONS = [np.array([0.223, 0.065, 0.065]),  # 0.5 L: Height: 223 mm, Diameter: 65 mm
-                  np.array([0.278, 0.079, 0.079]),  # 1.0 L: Height: 278 mm, Diameter: 79 mm
-                  np.array([0.320, 0.092, 0.092]),  # 1.5 L: Height: 320 mm, Diameter: 92 mm
-                  np.array([0.336, 0.101, 0.101]),  # 2.0 L: Height: 336 mm, Diameter: 101.5 mm
+                  np.array([0.161, 0.088, 0.088]),  # 0.75 L: Height: 161 mm, Diameter: 88 mm  
+                #   np.array([0.278, 0.079, 0.079]),  # 1.0 L: Height: 278 mm, Diameter: 79 mm
+                #   np.array([0.320, 0.092, 0.092]),  # 1.5 L: Height: 320 mm, Diameter: 92 mm
+                #   np.array([0.336, 0.101, 0.101]),  # 2.0 L: Height: 336 mm, Diameter: 101.5 mm
                   ]
 HDPE_TYPES = [BottleDetection.HDPE_COLOR, BottleDetection.HDPE_WHITE]
 HDPE_DIMENSIONS = [np.array([0.125, 0.067, 0.067]),  # 0.3 L: Height: 125 mm, Diameter: 67 mm
@@ -46,7 +47,7 @@ class FakeBottleDetection(object):
         invalid_bottles = set()
         stamp = rospy.Time.now()
         for i in range(self.num_bottles):
-            bottle = BottleDetection(parent_frame_id="worktable", score=1.0)
+            bottle = BottleDetection(parent_frame_id="bottles_table", score=1.0)
             attempt = 0
             valid_bottle = False
             while (not valid_bottle) and attempt < MAX_PLACEMENT_ATTEMPTS:
