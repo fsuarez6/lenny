@@ -1,121 +1,85 @@
 #! /usr/bin/env python
-import rospy
+import itertools
 import numpy as np
 import baldor as br
 import criutils as cu
 import raveutils as ru
 import openravepy as orpy
-# Messages
-from lenny_msgs.msg import BottleDetection
-from lenny_msgs.srv import DetectBottles, DetectBottlesResponse
 
 
-class BottleManager(object):
+class EnvironmentManager(object):
     COLORS = {
-        BottleDetection.PET_COLOR: [0.98, 0.85, 0.37, 1.],
-        # BottleDetection.PET_TRANSPARENT: [0.5, 0.5, 0.5, 1.],
-        BottleDetection.HDPE_COLOR: [0.80392157, 0.36078431, 0.36078431, 1.],
-        BottleDetection.HDPE_WHITE: [1., 0.98, 0.98, 1.],
+        "RED": [0.8, 0., 0., 1.],
+        "BLUE": [0., 0., 0.8, 1.],
+        "GREEN": [0., 0.8, 0., 1.],
     }
 
-    def __init__(self, env, srv_name="/bottle_detection/update"):
-        self.detect_srv = rospy.ServiceProxy(srv_name, DetectBottles)
-        rospy.loginfo("Waiting for service: {}".format(srv_name))
-        self.detect_srv.wait_for_service()
+    def __init__(self, env, num_cubes=6, seed=111):
         # Working entities
-        self.changed = False
         self.env = env
-        self.bins = self._add_bins()    # keys: bin_name, values: bin_type
-        self.existing_bottles = dict()  # keys: bottle_name, values: bottle_type
-        rospy.loginfo("Bottle manager successfully initialized")
+        self.bins = self._add_bins()                    # keys: bin_type, values: bin_name
+        self.cubes = self._add_cubes(num_cubes, seed)   # keys: cube_name, values: cube_type
+        print("Environment manager successfully initialized")
+    
+    def _add_cubes(self, num_cubes, seed):
+        table = self.env.GetKinBody("cubes_table")
+        aabb = table.ComputeAABB()
+        xdim, _, zdim = 2 * aabb.extents()
+        Tabove_table = table.GetTransform()
+        Tabove_table[:3, 3] += [0, 0, zdim + br._EPS]
+        zcube = Tabove_table[2, 3] + 1e-5  # Small delta to avoid colliding with the table
+        xx = np.linspace(0.44, 0.74, num=3)
+        yy = np.linspace(-0.3, 0.3, num=7) - Tabove_table[1,3]
+        max_num_cubes = len(xx) * len(yy)
+        np.random.seed(seed)
+        indices = np.random.choice(np.arange(max_num_cubes), num_cubes, replace=False)
+        yaws = (2 * np.random.rand(max_num_cubes) - 1) * np.deg2rad(45)
+        count = itertools.count(1)
+        color_names = self.COLORS.keys()
+        cubes = dict()
+        for i, (xcube, ycube) in enumerate(itertools.product(xx, yy)):
+            if i not in indices:
+                continue
+            cube_name = "cube_{0:02d}".format(count.next())
+            cube = self.env.ReadKinBodyXMLFile("objects/wood_cube.kinbody.xml")
+            yaw = yaws[i]
+            Tcube = br.euler.to_transform(0, 0, yaw)
+            Tcube[:3, 3] = [xcube, ycube, zcube]
+            with self.env:
+                cube.SetName(cube_name)
+                self.env.Add(cube)
+                cube.SetTransform(Tcube)
+            # Assign randomly a color for the cube
+            color_name = np.random.choice(color_names)
+            ru.body.set_body_color(cube, diffuse=self.COLORS[color_name])
+            cubes[cube_name] = color_name
+        return cubes
     
     def _add_bins(self):
         bins_table = self.env.GetKinBody("bins_table")
         aabb = bins_table.ComputeAABB()
         xdim, _, zdim = 2 * aabb.extents()
         Tabove_table = bins_table.GetTransform()
-        Tabove_table[:3, 3] += [0, -0.1, zdim + br._EPS]
+        Tabove_table[:3, 3] += [0, 0.6 - Tabove_table[1,3], zdim + br._EPS]
         offset = xdim / 2. - 0.175
         direction = Tabove_table[:3, 0]
         placements = [-1., 0, 1.]
-        num = 1
         bins = dict()
-        for placement, (color_name, color_value) in zip(placements, self.COLORS.items()):
+        for i, (placement, color_name) in enumerate(zip(placements, self.COLORS.keys())):
             body = self.env.ReadKinBodyXMLFile("objects/plastic_bin.kinbody.xml")
             Tbody = np.array(Tabove_table)
             Tbody[:3, 3] += offset * direction * placement
-            bin_name = "bin_{0:02d}".format(num)
+            bin_name = "bin_{0:02d}".format(i+1)
             with self.env:
                 body.SetName(bin_name)
                 self.env.Add(body)
                 body.SetTransform(Tbody)
-            ru.body.set_body_color(body, diffuse=color_value)
-            bins[bin_name] = color_name
-            num += 1
+            ru.body.set_body_color(body, diffuse=self.COLORS[color_name])
+            bins[color_name] = bin_name
         return bins
 
     def get_bins(self):
         return self.bins
 
-    def get_bottles(self):
-        return self.existing_bottles
-
-    def has_changed(self):
-        return self.changed
-
-    def update(self):
-        response = DetectBottlesResponse(success=False)
-        try:
-            response = self.detect_srv.call()
-        except rospy.ServiceException as ex:
-            rospy.logwarn("{0} service failed: {1}".format(self.detect_srv.resolved_name, ex))
-        if not response.success:
-            return
-        # Add the new bottles
-        self.changed = False
-        newexisting_bottles = set()
-        for bottle in response.bottles:
-            newexisting_bottles.add(bottle.frame_id)
-            parent_body = self.env.GetKinBody(bottle.parent_frame_id)
-            if parent_body is None:
-                rospy.logwarn("Failed to find parent_frame_id for: {}".format(bottle.frame_id))
-                continue
-            existing_body = self.env.GetKinBody(bottle.frame_id)
-            Tparent = parent_body.GetTransform()
-            Tbody_wrt_parent = cu.conversions.from_transform(bottle.transform)
-            Tbody = np.dot(Tparent, Tbody_wrt_parent)
-            add_new_bottle = False
-            if existing_body is None:
-                add_new_bottle = True
-            elif self.existing_bottles[bottle.frame_id] != bottle.bottle_type:
-                add_new_bottle = True
-            else:
-                extents = existing_body.GetLinks()[0].GetGeometries()[0].GetBoxExtents()
-                if not np.allclose(extents, cu.conversions.from_vector3(bottle.bbox_size)/2.):
-                    add_new_bottle = True
-                elif not br.transform.are_equal(Tbody, existing_body.GetTransform()):
-                    with self.env:
-                        existing_body.SetTransform(Tbody)
-            if add_new_bottle:
-                self.changed = True
-                if existing_body is not None:
-                    with self.env:
-                        self.env.Remove(existing_body)
-                self.existing_bottles[bottle.frame_id] = bottle.bottle_type
-                with self.env:
-                    body = orpy.RaveCreateKinBody(self.env, "")
-                    body.SetName(bottle.frame_id)
-                    boxes = np.zeros(6)
-                    boxes[3:] = cu.conversions.from_vector3(bottle.bbox_size) / 2.
-                    body.InitFromBoxes(boxes.reshape(1,6), draw=True)
-                    ru.body.set_body_color(body, BottleManager.COLORS[bottle.bottle_type][:3])
-                    ru.body.set_body_transparency(body, 1.-BottleManager.COLORS[bottle.bottle_type][3])
-                    body.SetTransform(Tbody)
-                    self.env.Add(body)
-        # Remove orphan bottles
-        orphanexisting_bottles = set(self.existing_bottles.keys()).difference(newexisting_bottles)
-        for orphan in orphanexisting_bottles:
-            try:
-                self.env.Remove(orphan)
-            except:
-                pass
+    def get_cubes(self):
+        return self.cubes

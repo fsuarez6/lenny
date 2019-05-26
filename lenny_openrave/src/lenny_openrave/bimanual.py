@@ -93,6 +93,16 @@ class BimanualPlanner(object):
                         if valid_config:
                             solutions.append(config)
         return solutions
+    
+    def get_num_active_joints(self):
+        num = 0
+        if self.torso_joint:
+            num += 1
+        if self.left_manip:
+            num += len(self.left_indices)
+        if self.right_manip:
+            num += len(self.right_indices)
+        return num
 
     def plan(self, qgoal, max_iters=40, max_ppiters=40):
         traj = orpy.RaveCreateTrajectory(self.env, '')
@@ -153,6 +163,11 @@ class BimanualPlanner(object):
         lower_angles = np.arange(0, lower_limit, torso_step * np.sign(lower_limit))
         upper_angles = np.arange(0, upper_limit, torso_step * np.sign(upper_limit))
         return np.unique(np.hstack((lower_angles, upper_angles)))
+    
+    def set_joint_values(self, values):
+        indices = np.hstack((self.torso_joint.GetDOFIndex(), self.left_indices, self.right_indices))
+        with self.env:
+            self.robot.SetDOFValues(values, indices)
 
     def set_left_manipulator(self, manip_name):
         success = False

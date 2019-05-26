@@ -30,7 +30,7 @@ HDPE_DIMENSIONS = [np.array([0.125, 0.067, 0.067]),  # 0.3 L: Height: 125 mm, Di
 BOTTLE_TYPES = PET_TYPES + HDPE_TYPES
 
 # Worktable and bottles placement
-WORKTABLE_EXTENTS = np.array([0.515, 0.625])    # The real size is twice the extents
+WORKTABLE_EXTENTS = np.array([0.17, 0.4])    # The real size is twice the extents
 MAX_PLACEMENT_ATTEMPTS = 100
 
 
@@ -86,7 +86,7 @@ class FakeBottleDetection(object):
             bottle.frame_id = "bottle_{0:02d}".format(i + 1)
             bottle.bbox_size = Vector3(*bbox)
             # Add 0.1 mm to avoid collisions with the worktable
-            bottle.transform.translation = Vector3(new_pos[0], new_pos[1], bbox[2] / 2. + 1e-4)
+            bottle.transform.translation = Vector3(new_pos[0], new_pos[1], bbox[2] / 2. + 0.7747 + 1e-3)
             # Generate a random orientation (yaw)
             quat = br.euler.to_quaternion(0, 0, 2 * np.pi * random.random())
             bottle.transform.rotation = cu.conversions.to_quaternion(quat)
