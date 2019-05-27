@@ -1,5 +1,7 @@
 #! /usr/bin/env python
+import time
 import numpy as np
+import robotsp as rtsp
 import openravepy as orpy
 
 from lenny_openrave.manager import EnvironmentManager
@@ -18,7 +20,7 @@ robot.SetDOFValues(np.zeros(robot.GetDOF()))
 env.SetViewer("qtcoin")
 
 # Environment manager
-eman = EnvironmentManager(env, num_cubes=20)
+eman = EnvironmentManager(env, num_cubes=20, seed=123)
 cubes = eman.get_cubes()
 bins = eman.get_bins()
 
@@ -34,13 +36,12 @@ if not bimanual.load_ikfast(freeinc=np.pi / 6.):
 # PDP Scheduler
 scheduler = PDPScheduler(bimanual)
 print ("Constructing PDP graph...")
-graph, reachable_set = scheduler.construct_pdp_graph(bins, cubes)
-nodes = set(graph.nodes())
+tgraph, reachable_set = scheduler.construct_pdp_graph(bins, cubes)
+nodes = set(tgraph.nodes())
 nodes.remove("home")
 print ("Can the robot reach all the locations? {0}".format(nodes == reachable_set))
 types = EnvironmentManager.COLORS.keys()
-# tour = scheduler.generate_sequence(graph, types)
-
+sequence = scheduler.generate_sequence(tgraph, types)
 
 
 import networkx as nx
@@ -48,56 +49,42 @@ import IPython
 IPython.embed(banner1="")
 exit(0)
 
-import lkh_solver as lkh
-# Generate the demand matrix
-nodelist = sorted(graph.nodes())
-# Make sure that the first node is "home". Seems like the LKH solver is expecting the depot to be the first node.
-depot = 0
-nodelist.pop(nodelist.index("home"))
-nodelist.insert(depot, "home")
-num_nodes = graph.number_of_nodes()
-num_types = len(types)
-type_indices = {name:index for index, name in enumerate(types)}
-demand = np.zeros((num_nodes, num_types), dtype=int)
-for i in xrange(num_nodes):
-    n = nodelist[i]
-    node_demand = graph.node[n]["demand"]
-    if node_demand == 0:
-        continue
-    type_name = graph.node[n]["type"]
-    type_idx = type_indices[type_name]
-    demand[i, type_idx] = node_demand
-if np.any(np.sum(demand, axis=0)):
-    # The demand sum for each column must be zero
-    raise Exception("The demand matrix is not feasible")
-# m-PDTSP
-params = lkh.solver.SolverParameters()
-m, n = num_types, num_nodes - num_types - 1
-params.problem_file = "/tmp/lkh/m{0}n{1}task.m-pdtsp".format(m, n)
-params.max_trials = 1
-params.runs = 3
-params.special = True
-params.depot = depot + 1
-lkh.parser.write_tsplib(params.problem_file, graph, params, nodelist=nodelist, demand=demand, capacity=2, depot=depot)
-tour, info = lkh.solver.lkh_solver(params)
-if tour is None:
-    raise Exception("Failed to find a feasible sequence")
-# For the sequence, we only need the cubes pairs
-indices = np.array(tour[0]) - 1
-if indices[0] != depot:
-    raise Exception("The first node must be the depot/home")
 
-sequence = list()
-prev_node =  None
-for idx in indices:
-    node = nodelist[idx]
-    if "cube" not in node:
-        prev_node = None
-        continue
-    if prev_node is None:
-        prev_node = node
-        continue
-    sequence.append((prev_node, node))
-    weight = graph.edge[prev_node][node]["weight"]
-    if weight != 0:
-        print("Unexpected weight {0}-{1}: {2}".format(prev_node, node, weight))
+# Robotsp from home, then to the cubes and finally back home again
+qhome = np.zeros(robot.GetActiveDOF())
+vmax = robot.GetDOFVelocityLimits(robot.GetActiveDOFIndices())
+setslist = [[qhome]]
+# Add the cubes and bins configurations.
+for cube_i, cube_j in sequence:
+    setslist.append(tgraph.edge[cube_i][cube_j]["configs"]) # Cubes
+    bin_i = cube_i.replace("cube", "bin")
+    bin_j = cube_j.replace("cube", "bin")
+    setslist.append(tgraph.edge[bin_i][bin_j]["configs"])   # Bins
+setslist += [[qhome]]
+cgraph, sets = rtsp.construct.from_sorted_setslist(setslist, distfn=rtsp.metric.max_joint_diff_fn, args=(1./vmax,))
+ctour = nx.dijkstra_path(cgraph, source=0, target=cgraph.number_of_nodes()-1)
+# Compute the trajectories
+cpu_times = []
+trajectories = []
+for idx in xrange(len(ctour)-1):
+    u = ctour[idx]
+    v = ctour[idx+1]
+    qstart = cgraph.node[u]["value"]
+    qgoal = cgraph.node[v]["value"]
+    starttime = time.time()
+    with robot:
+        robot.SetActiveDOFValues(qstart)
+        traj = bimanual.plan(qgoal, max_iters=100, max_ppiters=40)
+    cputime = time.time() - starttime
+    cpu_times.append(cputime)
+    trajectories.append(traj)
+
+
+for u,v in sequence:
+    try:
+        msg = "{0}: {1}".format(u, tgraph.node[u]["type"])
+        print(msg)
+        msg = "{0}: {1}".format(v, tgraph.node[v]["type"])
+        print(msg)
+    except KeyError:
+        pass
