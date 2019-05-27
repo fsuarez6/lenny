@@ -4,8 +4,9 @@ import numpy as np
 import baldor as br
 import networkx as nx
 import criutils as cu
-import robotsp as rtsp
 import raveutils as ru
+import robotsp as rtsp
+import lkh_solver as lkh
 import openravepy as orpy
 
 # from lenny_openrave.manager import BottleManager
@@ -24,18 +25,22 @@ class PDPScheduler(object):
         graph = nx.Graph()
         robot_position = self.robot.GetTransform()[:3, 3]
         graph.add_node("home", position=robot_position, demand=0)   # Robot home
-        # Add bins nodes
-        for bin_type, bin_id in bins.items():
-            Tbin = self.env.GetKinBody(bin_id).GetTransform()
-            Ttcp_bin = np.array(Tbin)
-            Ttcp_bin[:3, 3] += self.bin_offset
-            graph.add_node(bin_id, position=Tbin[:3,3], demand=-1, type=bin_type, Ttcp=Ttcp_bin)
-        # Add cubes nodes
+        # Add cubes and bins nodes. We need to create dummy bins due to the m-PDTSP problem definition
+        binid_list = []
         for cube_id, cube_type in cubes.items():
+            # Cube
             Tcube = self.env.GetKinBody(cube_id).GetTransform()
             Ttcp_cube = np.array(Tcube)
             Ttcp_cube[:3, 3] += self.cube_offset
-            graph.add_node(cube_id, position=Tcube[:3,3], demand=1, type=cube_type, Ttcp=Ttcp_cube)
+            graph.add_node(cube_id, position=Tcube[:3,3], demand=-1, type=cube_type, Ttcp=Ttcp_cube)
+            # Bin
+            bin_name = bins[cube_type]
+            Tbin = self.env.GetKinBody(bin_name).GetTransform()
+            Ttcp_bin = np.array(Tbin)
+            Ttcp_bin[:3, 3] += self.bin_offset
+            bin_id = cube_id.replace("cube", "bin")
+            graph.add_node(bin_id, position=Tbin[:3,3], demand=1, type=cube_type, Ttcp=Ttcp_bin)
+            binid_list.append(bin_id)
         # Compute the distances all the node pairs
         for u, v in itertools.combinations(graph.nodes_iter(), 2):
             dist = distfn(graph.node[u]["position"], graph.node[v]["position"])
@@ -46,7 +51,7 @@ class PDPScheduler(object):
         tmp_configs = dict()
         valid_bin_combinations = set()
         nonedge = 99.999
-        for node_i, node_j in itertools.combinations(bins.values(), 2):
+        for node_i, node_j in itertools.combinations(binid_list, 2):
             type_i = graph.node[node_i]["type"]
             type_j = graph.node[node_j]["type"]
             if type_i == type_j:
@@ -112,5 +117,5 @@ class PDPScheduler(object):
                 reachable_set.add(node_j)
         return graph, reachable_set
     
-    def generate_sequence(self, graph):
-        return graph
+    def generate_sequence(self, graph, types):
+        pass
