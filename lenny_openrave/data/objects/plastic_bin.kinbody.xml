@@ -7,19 +7,19 @@
       <translation>0 0 0.005</translation>
     </geom>
     <geom name="left" type="box">
-      <extents>0.005 0.125 0.05</extents>
+      <extents>0.005 0.125 0.03</extents>
       <diffusecolor>0.6 0.6 0.6</diffusecolor>
-      <translation>-0.13 0 0.05</translation>
+      <translation>-0.13 0 0.03</translation>
     </geom>
     <geom name="right" type="box">
-      <extents>0.005 0.125 0.05</extents>
+      <extents>0.005 0.125 0.03</extents>
       <diffusecolor>0.6 0.6 0.6</diffusecolor>
-      <translation>0.13 0 0.05</translation>
+      <translation>0.13 0 0.03</translation>
     </geom>
     <geom name="back" type="box">
-      <extents>0.135 0.005 0.1</extents>
+      <extents>0.135 0.005 0.04</extents>
       <diffusecolor>0.6 0.6 0.6</diffusecolor>
-      <translation>0 0.13 0.1</translation>
+      <translation>0 0.13 0.04</translation>
     </geom>
     <geom name="front" type="box">
       <extents>0.135 0.005 0.025</extents>

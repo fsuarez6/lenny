@@ -74,9 +74,8 @@ for idx in xrange(len(ctour)-1):
     starttime = time.time()
     with robot:
         robot.SetActiveDOFValues(qstart)
-        traj = bimanual.plan(qgoal, max_iters=100, max_ppiters=40)
-    cputime = time.time() - starttime
-    cpu_times.append(cputime)
+        traj = bimanual.plan(qgoal, max_iters=40, max_ppiters=40)
+    cpu_times.append(time.time() - starttime)
     trajectories.append(traj)
 
 

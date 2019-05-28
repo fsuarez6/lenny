@@ -110,11 +110,11 @@ class PDPScheduler(object):
         if crossed:
             with self.robot:
                 self.bimanual.set_torso_joint_value(qtorso)
-                solutions = self.bimanual.find_ik_solutions(Tj, Ti)
+                solutions = self.bimanual.find_ik_solutions(Tj, Ti, freeinc=np.pi)
         else:
             with self.robot:
                 self.bimanual.set_torso_joint_value(qtorso)
-                solutions = self.bimanual.find_ik_solutions(Ti, Tj)
+                solutions = self.bimanual.find_ik_solutions(Ti, Tj, freeinc=np.pi)
         num_sols = len(solutions)
         configs = None
         if num_sols > 0:

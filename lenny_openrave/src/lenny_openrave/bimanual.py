@@ -2,6 +2,7 @@
 import math
 import itertools
 import numpy as np
+import baldor as br
 import raveutils as ru
 import robotsp as rtsp
 import openravepy as orpy
@@ -69,7 +70,7 @@ class BimanualPlanner(object):
                 best_idx = i
         return best_idx
 
-    def find_ik_solutions(self, Tleft, Tright, collision_free=True, lazy_check=False):
+    def find_ik_solutions(self, Tleft, Tright, collision_free=True, lazy_check=False, freeinc=None):
         # Lazy check for reachability
         if lazy_check:
             reach_left = self.lazy_reachability_check(self.left_manip, Tleft[:3, 3])
@@ -77,13 +78,23 @@ class BimanualPlanner(object):
             if not (reach_left and reach_right):
                 return []
         solutions = []
+        if freeinc is not None:
+            target_left = ru.conversions.to_ray(Tleft)
+            target_right = ru.conversions.to_ray(Tright)
+        else:
+            target_left = Tleft
+            target_right = Tright
         # IKFast for the left arm
+        _, _, yaw = br.transform.to_euler(Tleft)
         self.robot.SetActiveManipulator(self.left_manip)
-        left_sols = ru.kinematics.find_ik_solutions(self.robot, Tleft, self.iktype, collision_free=collision_free)
+        left_sols = ru.kinematics.find_ik_solutions(self.robot, target_left, self.iktype, 
+                                                    collision_free=collision_free, freeinc=freeinc, angle_offset=yaw)
         if len(left_sols) > 0:
             # IKFast for the right arm
+            _, _, yaw = br.transform.to_euler(Tright)
             self.robot.SetActiveManipulator(self.right_manip)
-            right_sols = ru.kinematics.find_ik_solutions(self.robot, Tright, self.iktype, collision_free=collision_free)
+            right_sols = ru.kinematics.find_ik_solutions(self.robot, target_right, self.iktype, 
+                                                    collision_free=collision_free, freeinc=freeinc, angle_offset=yaw)
             if len(right_sols) > 0:
                 # The solutions list is the combinations of left and right sols
                 with self.robot:
