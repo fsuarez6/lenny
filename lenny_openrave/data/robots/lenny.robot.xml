@@ -24,7 +24,6 @@
         <body name="robotiq_c2_base_link">
             <offsetfrom>arm_right_link_7_t</offsetfrom>
             <rotationaxis>1 0 0 -90</rotationaxis>
-            <rotationaxis>0 0 1 180</rotationaxis>
             <translation>0 0 -0.01846</translation>
         </body>
         <joint name="robotiq_c2_base_joint" type="hinge" enable="false">
@@ -33,4 +32,25 @@
             <limits>0 0</limits>
         </joint>
     </kinbody>
+
+    <!-- Define the manipulators -->
+    <Manipulator name="left_gripper">
+        <base>torso_link_b1</base>
+        <effector>robotiq_85_base_link</effector>
+        <translation>0 0.12554 0.011115027122497567</translation>
+        <rotationaxis>1 0 0 -90</rotationaxis>
+        <joints>robotiq_85_left_knuckle_joint</joints>
+        <closingdirection>1</closingdirection>
+        <direction>0 0 1</direction>
+    </Manipulator>
+
+    <Manipulator name="right_gripper">
+        <base>torso_link_b1</base>
+        <effector>robotiq_c2_base_link</effector>
+        <translation>0 0.12554 0.011115027122497567</translation>
+        <rotationaxis>1 0 0 -90</rotationaxis>
+        <joints>robotiq_c2_left_knuckle_joint</joints>
+        <closingdirection>1</closingdirection>
+        <direction>0 0 1</direction>
+    </Manipulator>
 </robot>
