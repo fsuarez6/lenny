@@ -17,8 +17,8 @@ class PDPScheduler(object):
         self.bimanual = bimanual
         self.robot = bimanual.robot
         self.env = self.robot.GetEnv()
-        self.bin_offset = np.array([0, 0, 0.25])
-        self.cube_offset = np.array([0, 0, 0.22])
+        self.bin_offset = np.array([0, 0, 0.25 - 0.14])
+        self.cube_offset = np.array([0, 0, 0.22 - 0.14])
     
     def construct_pdp_graph(self, bins, cubes, distfn=rtsp.metric.euclidean_fn):
         # Construct the Multi-commodity pickup-and-delivery TSP (m-PDTSP) graph
@@ -110,11 +110,11 @@ class PDPScheduler(object):
         if crossed:
             with self.robot:
                 self.bimanual.set_torso_joint_value(qtorso)
-                solutions = self.bimanual.find_ik_solutions(Tj, Ti, freeinc=np.pi)
+                solutions = self.bimanual.find_ik_solutions(Tj, Ti)
         else:
             with self.robot:
                 self.bimanual.set_torso_joint_value(qtorso)
-                solutions = self.bimanual.find_ik_solutions(Ti, Tj, freeinc=np.pi)
+                solutions = self.bimanual.find_ik_solutions(Ti, Tj)
         num_sols = len(solutions)
         configs = None
         if num_sols > 0:

@@ -40,11 +40,12 @@ tgraph, reachable_set = scheduler.construct_pdp_graph(bins, cubes)
 nodes = set(tgraph.nodes())
 nodes.remove("home")
 print ("Can the robot reach all the locations? {0}".format(nodes == reachable_set))
-types = EnvironmentManager.COLORS.keys()
-sequence = scheduler.generate_sequence(tgraph, types)
+sequence = scheduler.generate_sequence(tgraph, types=EnvironmentManager.COLORS.keys())
 
 
 import networkx as nx
+import raveutils as ru
+
 import IPython
 IPython.embed(banner1="")
 exit(0)
@@ -74,9 +75,12 @@ for idx in xrange(len(ctour)-1):
     starttime = time.time()
     with robot:
         robot.SetActiveDOFValues(qstart)
-        traj = bimanual.plan(qgoal, max_iters=40, max_ppiters=40)
+        traj = bimanual.plan(qgoal, max_iters=60, max_ppiters=40)
     cpu_times.append(time.time() - starttime)
     trajectories.append(traj)
+
+controller = robot.GetController()
+controller.SetPath(trajectories[0])
 
 
 for u,v in sequence:
@@ -87,3 +91,13 @@ for u,v in sequence:
         print(msg)
     except KeyError:
         pass
+
+
+Tleft = robot.SetActiveManipulator('arm_left_tool0').GetTransform()
+Tright = robot.SetActiveManipulator('arm_right_tool0').GetTransform()
+Toffset = np.eye(4)
+Toffset[:3,3] = [0., -0.011115027122497567, -0.14]
+Tleft = np.dot(Tleft, Toffset)
+Tright = np.dot(Tright, Toffset)
+h1 = ru.visual.draw_axes(env, Tleft)
+h2 = ru.visual.draw_axes(env, Tright)

@@ -21,6 +21,10 @@ class BimanualPlanner(object):
         self.right_anchor_joint = None
         self.iktype = orpy.IkParameterizationType.Transform6D
         self.torso_joint = None
+        # Offset wrt. manip frame
+        Toffset = np.eye(4)
+        Toffset[:3,3] = [0., -0.011115027122497567, -0.14]
+        self.Toffset = br.transform.inverse(Toffset)
 
     def _estimate_arm_lenght(self, manip):
         joints = [j for j in self.robot.GetDependencyOrderedJoints() if j.GetJointIndex() in manip.GetArmIndices()]
@@ -77,6 +81,9 @@ class BimanualPlanner(object):
             reach_right = self.lazy_reachability_check(self.right_manip, Tright[:3, 3])
             if not (reach_left and reach_right):
                 return []
+        # Offset the transform to match the gripper tcp
+        Tleft = np.dot(Tleft, self.Toffset)
+        Tright = np.dot(Tright, self.Toffset)
         solutions = []
         if freeinc is not None:
             target_left = ru.conversions.to_ray(Tleft)
