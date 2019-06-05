@@ -58,22 +58,22 @@ class PDPScheduler(object):
             type_i = graph.node[node_i]["type"]
             type_j = graph.node[node_j]["type"]
             if type_i == type_j:
-                # Remove edges between bins of the same type, if any
+                # Remove edges between bins of the same type
                 graph.add_edge(node_i, node_j, weight=nonedge)
                 continue
-            if (type_i, type_j) in valid_bin_combinations:
-                combination = (type_i, type_j)
-            else:
-                combination = (type_j, type_i)
+            combination = (type_i, type_j)
             num_configs = 0
             if combination in valid_bin_combinations:
                 configs = tmp_configs[combination]
                 num_configs = len(configs)
-            else:
+            elif combination not in checked_combinations:
+                checked_combinations.add(combination)
                 Ti = graph.node[node_i]["Ttcp"]
                 Tj = graph.node[node_j]["Ttcp"]
                 crossed, configs = self.find_crossed_configurations(Ti, Tj)
                 if configs is not None:
+                    if crossed:
+                        combination = (type_j, type_i)
                     valid_bin_combinations.add(combination)
                     tmp_configs[combination] = configs
             if num_configs > 0:
@@ -87,19 +87,22 @@ class PDPScheduler(object):
             type_i = graph.node[node_i]["type"]
             type_j = graph.node[node_j]["type"]
             if type_i == type_j:
+                # Remove edges between cubes of the same type
+                graph.add_edge(node_i, node_j, weight=nonedge)
                 continue
             Ti = graph.node[node_i]["Ttcp"]
             Tj = graph.node[node_j]["Ttcp"]
-            if (type_i, type_j) in valid_bin_combinations or (type_j, type_i) in valid_bin_combinations:
+            if (type_i, type_j) in valid_bin_combinations:
                 crossed, configs = self.find_crossed_configurations(Ti, Tj)
-                if configs is not None:
-                    if crossed:
-                        valid_cube_combinations.add((node_j, node_i))
-                    else:
-                        valid_cube_combinations.add((node_i, node_j))
+                if (not crossed) and (configs is not None):
+                    valid_cube_combinations.add((node_i, node_j))
                     graph.add_edge(node_i, node_j, weight=0, configs=configs)
                     reachable_set.add(node_i)
                     reachable_set.add(node_j)
+            weight = graph.edge[node_i][node_j]["weight"]
+            if weight != 0:
+                # Penalize unreachable cube pairs
+                graph.add_edge(node_i, node_j, weight=nonedge)
         return graph, reachable_set
     
     def find_crossed_configurations(self, Ti, Tj):
@@ -174,5 +177,6 @@ class PDPScheduler(object):
             sequence.append((prev_node, node))
             weight = graph.edge[prev_node][node]["weight"]
             if weight != 0:
-                raise Exception("Unexpected weight {0}-{1}: {2}".format(prev_node, node, weight))
+                # raise Exception("Unexpected weight {0} -- {1}: {2}".format(prev_node, node, weight))
+                print("Unexpected weight {0} -- {1}: {2}".format(prev_node, node, weight))
         return sequence
