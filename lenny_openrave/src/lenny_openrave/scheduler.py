@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+import random
 import itertools
 import numpy as np
 import baldor as br
@@ -17,8 +18,71 @@ class PDPScheduler(object):
         self.bimanual = bimanual
         self.robot = bimanual.robot
         self.env = self.robot.GetEnv()
-        self.bin_offset = np.array([0, 0, 0.25 - 0.14])
-        self.cube_offset = np.array([0, 0, 0.22 - 0.14])
+        self.bin_offset = np.array([0, 0, 0.15])
+        self.cube_offset = np.array([0, 0, 0.15])
+    
+    def get_bin_tcp_transform(self, bin_name):
+        Tbin = self.env.GetKinBody(bin_name).GetTransform()
+        Ttcp_bin = np.array(Tbin)
+        Ttcp_bin[:3, 3] += self.bin_offset
+        return Ttcp_bin
+    
+    def get_cube_tcp_transform(self, cube_name):
+        Tbin = self.env.GetKinBody(cube_name).GetTransform()
+        Ttcp_bin = np.array(Tbin)
+        Ttcp_bin[:3, 3] += self.cube_offset
+        return Ttcp_bin
+
+    def find_reachable_configurations(self, bins, cubes, freeinc=None):
+        unreachable_bin_combinations_set = set()
+        reachable_bin_combinations = dict()
+        reachable_cube_combinations = dict()
+        for cube_i, cube_j in itertools.combinations(cubes.keys(), 2):
+            type_i = cubes[cube_i]
+            type_j = cubes[cube_j]
+            combination = (type_i, type_j)
+            if type_i == type_j or combination in unreachable_bin_combinations_set:
+                # Ignore cubes of the same type or cubes that cannot be placed
+                continue
+            # Check if we can reach this bin combination
+            reachable_bin_combination = True
+            if combination not in reachable_bin_combinations:
+                Tbin_i = self.get_bin_tcp_transform(bins[type_i])
+                Tbin_j = self.get_bin_tcp_transform(bins[type_j])
+                crossed, configs = self.bimanual.find_wholebody_ik_solutions(Tbin_i, Tbin_j, freeinc=freeinc)
+                reachable_bin_combination = (not crossed) and (configs is not None)
+                if configs is not None:
+                    if crossed:
+                        unreachable_bin_combinations_set.add(combination)
+                        cache_key = tuple(reversed(combination))
+                    else:
+                        cache_key = tuple(combination)
+                    reachable_bin_combinations[cache_key] = configs
+            if not reachable_bin_combination:
+                continue
+            # Check if we can reach this pair of cubes
+            Tcube_i = self.get_cube_tcp_transform(cube_i)
+            Tcube_j = self.get_cube_tcp_transform(cube_j)
+            crossed, configs = self.bimanual.find_wholebody_ik_solutions(Tcube_i, Tcube_j, freeinc=freeinc)
+            reachable = (not crossed) and (configs is not None)
+            if reachable:
+                reachable_cube_combinations[(cube_i, cube_j)] = configs
+        return reachable_bin_combinations, reachable_cube_combinations
+    
+    def generate_sequence_random(self, reachable_cube_pairs, num_cubes):
+        sequence = None
+        combinations = list(reachable_cube_pairs)
+        random.shuffle(combinations)
+        for pairs in itertools.combinations(combinations, num_cubes/2):
+            visited = set()
+            for cube_i, cube_j in pairs:
+                if cube_i not in visited and cube_j not in visited:
+                    visited.add(cube_i)
+                    visited.add(cube_j)
+            if len(visited) == num_cubes:
+                sequence = sorted(pairs)
+                break
+        return sequence
     
     def construct_pdp_graph(self, bins, cubes, distfn=rtsp.metric.euclidean_fn):
         # Construct the Multi-commodity pickup-and-delivery TSP (m-PDTSP) graph
@@ -126,7 +190,7 @@ class PDPScheduler(object):
             configs[:, 1:] = solutions
         return crossed, configs
     
-    def generate_sequence(self, graph, types):
+    def generate_sequence_pdtsp(self, graph, types):
         # Generate the demand matrix
         nodelist = sorted(graph.nodes())
         # Make sure that the first node is "home". Seems like the LKH solver is expecting the depot to be the first node.

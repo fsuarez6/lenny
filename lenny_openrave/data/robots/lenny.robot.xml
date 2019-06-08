@@ -3,54 +3,56 @@
     <!-- Add the robot -->
     <robot file="sda10f.robot.xml"/>
 
-    <!-- Add the left gripper -->
-    <kinbody file="robotiq_c2.robot.xml">
-        <!-- We need to do forward declaration for: robotiq_85_base_link and robotiq_85_base_joint-->
-        <body name="robotiq_85_base_link">
+    <!-- Left suction cup -->
+    <Kinbody>
+        <body name="left_suction_cup">
             <offsetfrom>arm_left_link_7_t</offsetfrom>
+            <translation>0 0 -0.0137</translation>
             <rotationaxis>1 0 0 -90</rotationaxis>
-            <translation>0 0 -0.01846</translation>
+            <geom name="holder" type="cylinder">
+                <radius>0.005</radius>
+                <height>0.05</height>
+                <diffuseColor>0.51764706 0.52941176 0.5372549</diffuseColor>
+                <translation>0 0.025 0</translation>
+            </geom>
+            <geom name="suction_cup" type="cylinder">
+                <radius>0.015</radius>
+                <height>0.01</height>
+                <diffuseColor>0.05 0.05 0.05</diffuseColor>
+                <translation>0 0.055 0</translation>
+            </geom>
         </body>
-        <joint name="robotiq_85_base_joint" type="hinge" enable="false">
+        <joint name="left_suction_cup_joint" type="hinge" enable="false">
             <body>arm_left_link_7_t</body>
-            <body>robotiq_85_base_link</body>
+            <body>left_suction_cup</body>
             <limits>0 0</limits>
         </joint>
-    </kinbody>
+    </Kinbody>
 
-    <!-- Add the right gripper -->
-    <kinbody file="robotiq_c2b.robot.xml">
-        <!-- We need to do forward declaration for: robotiq_c2_base_link and robotiq_c2_base_joint-->
-        <body name="robotiq_c2_base_link">
+    <!-- Right suction cup -->
+    <Kinbody>
+        <body name="right_suction_cup">
             <offsetfrom>arm_right_link_7_t</offsetfrom>
+            <translation>0 0 -0.0137</translation>
             <rotationaxis>1 0 0 -90</rotationaxis>
-            <translation>0 0 -0.01846</translation>
+            <geom name="holder" type="cylinder">
+                <radius>0.005</radius>
+                <height>0.05</height>
+                <diffuseColor>0.51764706 0.52941176 0.5372549</diffuseColor>
+                <translation>0 0.025 0</translation>
+            </geom>
+            <geom name="suction_cup" type="cylinder">
+                <radius>0.015</radius>
+                <height>0.01</height>
+                <diffuseColor>0.05 0.05 0.05</diffuseColor>
+                <translation>0 0.055 0</translation>
+            </geom>
         </body>
-        <joint name="robotiq_c2_base_joint" type="hinge" enable="false">
+        <joint name="right_suction_cup_joint" type="hinge" enable="false">
             <body>arm_right_link_7_t</body>
-            <body>robotiq_c2_base_link</body>
+            <body>right_suction_cup</body>
             <limits>0 0</limits>
         </joint>
-    </kinbody>
+    </Kinbody>
 
-    <!-- Define the manipulators -->
-    <Manipulator name="left_gripper">
-        <base>torso_link_b1</base>
-        <effector>robotiq_85_base_link</effector>
-        <translation>0 0.12554 0.011115027122497567</translation>
-        <rotationaxis>1 0 0 -90</rotationaxis>
-        <joints>robotiq_85_left_knuckle_joint</joints>
-        <closingdirection>1</closingdirection>
-        <direction>0 0 1</direction>
-    </Manipulator>
-
-    <Manipulator name="right_gripper">
-        <base>torso_link_b1</base>
-        <effector>robotiq_c2_base_link</effector>
-        <translation>0 0.12554 0.011115027122497567</translation>
-        <rotationaxis>1 0 0 -90</rotationaxis>
-        <joints>robotiq_c2_left_knuckle_joint</joints>
-        <closingdirection>1</closingdirection>
-        <direction>0 0 1</direction>
-    </Manipulator>
 </robot>

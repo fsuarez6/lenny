@@ -23,7 +23,7 @@ class BimanualPlanner(object):
         self.torso_joint = None
         # Offset wrt. manip frame
         Toffset = np.eye(4)
-        Toffset[:3,3] = [0., -0.011115027122497567, -0.14]
+        Toffset[:3,3] = [0., 0., -0.06]
         self.Toffset = br.transform.inverse(Toffset)
 
     def _estimate_arm_lenght(self, manip):
@@ -116,6 +116,27 @@ class BimanualPlanner(object):
                         if valid_config:
                             solutions.append(config)
         return solutions
+    
+    def find_wholebody_ik_solutions(self, Ti, Tj, freeinc=None):
+        qtorso = self.estimate_torso_angle(Ti[:3, 3], Tj[:3, 3])
+        with self.robot:
+            self.set_torso_joint_value(qtorso)
+            crossed = self.lazy_crossed_arms_check(Ti[:3, 3], Tj[:3, 3])
+        if crossed:
+            with self.robot:
+                self.set_torso_joint_value(qtorso)
+                arms_sols = self.find_ik_solutions(Tj, Ti, freeinc=freeinc)
+        else:
+            with self.robot:
+                self.set_torso_joint_value(qtorso)
+                arms_sols = self.find_ik_solutions(Ti, Tj, freeinc=freeinc)
+        num_sols = len(arms_sols)
+        solutions = None
+        if num_sols > 0:
+            solutions = np.zeros( (num_sols, self.robot.GetActiveDOF()) )
+            solutions[:, 0] = qtorso
+            solutions[:, 1:] = arms_sols
+        return crossed, solutions
 
     def plan(self, qgoal, max_iters=40, max_ppiters=40):
         traj = orpy.RaveCreateTrajectory(self.env, '')

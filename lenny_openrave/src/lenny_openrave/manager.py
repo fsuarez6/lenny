@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+import time
 import itertools
 import numpy as np
 import baldor as br
@@ -18,28 +19,31 @@ class EnvironmentManager(object):
         # Working entities
         self.env = env
         self.bins = self._add_bins()                    # keys: bin_type, values: bin_name
-        self.cubes = self._add_cubes(num_cubes, seed)   # keys: cube_name, values: cube_type
+        self.cubes = self._add_cubes(seed)   # keys: cube_name, values: cube_type
         print("Environment manager successfully initialized")
     
-    def _add_cubes(self, num_cubes, seed):
+    def _add_cubes(self, seed):
         table = self.env.GetKinBody("cubes_table")
         aabb = table.ComputeAABB()
         xdim, _, zdim = 2 * aabb.extents()
         Tabove_table = table.GetTransform()
         Tabove_table[:3, 3] += [0, 0, zdim + br._EPS]
         zcube = Tabove_table[2, 3] + 1e-5  # Small delta to avoid colliding with the table
-        xx = np.linspace(0.44, 0.74, num=3)
-        yy = np.linspace(-0.3, 0.3, num=7) - Tabove_table[1,3]
-        max_num_cubes = len(xx) * len(yy)
+        xx = np.linspace(0.35, 0.7, num=3)
+        yy = np.linspace(-0.3, 0.3, num=5) - Tabove_table[1,3]
+        num_cubes = 14
         np.random.seed(seed)
-        indices = np.random.choice(np.arange(max_num_cubes), num_cubes, replace=False)
-        yaws = (2 * np.random.rand(max_num_cubes) - 1) * np.deg2rad(45)
+        yaws = (2 * np.random.rand(num_cubes) - 1) * np.deg2rad(45)
         count = itertools.count(1)
-        color_names = self.COLORS.keys()
+        color_names = [
+            "RED", "GREEN", "BLUE", "GREEN", "BLUE", 
+            "RED", "RED", "GREEN", "BLUE", "RED",
+            "BLUE", "GREEN", "GREEN", "BLUE"
+        ]
         cubes = dict()
         for i, (xcube, ycube) in enumerate(itertools.product(xx, yy)):
-            if i not in indices:
-                continue
+            if i >= num_cubes:
+                break
             cube_name = "cube_{0:02d}".format(count.next())
             cube = self.env.ReadKinBodyXMLFile("objects/wood_cube.kinbody.xml")
             yaw = yaws[i]
@@ -49,8 +53,8 @@ class EnvironmentManager(object):
                 cube.SetName(cube_name)
                 self.env.Add(cube)
                 cube.SetTransform(Tcube)
-            # Assign randomly a color for the cube
-            color_name = np.random.choice(color_names)
+            # Assign a color for the cube
+            color_name = color_names[i]
             ru.body.set_body_color(cube, diffuse=self.COLORS[color_name])
             cubes[cube_name] = color_name
         return cubes
@@ -83,3 +87,15 @@ class EnvironmentManager(object):
 
     def get_cubes(self):
         return self.cubes
+    
+    def start_viewer(self, viewer_name, size=(1024,768), Tcamera=None):
+        self.env.SetViewer(viewer_name)
+        while (self.env.GetViewer() is None):
+            time.sleep(0.1)
+        viewer = self.env.GetViewer()
+        viewer.SetSize(*size)
+        if Tcamera is None:
+            rpy = np.deg2rad([235., 0., 110.])
+            Tcamera = br.euler.to_transform(*rpy)
+            Tcamera[:3,3] = [2.3, 1., 2.1]
+        viewer.SetCamera(Tcamera)
