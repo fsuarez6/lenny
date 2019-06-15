@@ -105,14 +105,21 @@ if args.ik:
             robot.SetActiveDOFValues(qgoal)
         twist = np.zeros(6)
         twist[2] = -0.085
+        cpu_times = []
+        trajectories = []
         for manip in [bimanual.left_manip, bimanual.right_manip]:
             robot.SetActiveManipulator(manip)
             robot.SetActiveDOFs(manip.GetArmIndices())
+            starttime = time.time()
             traj = ru.planning.plan_cartesian_twist(robot, twist)
+            cpu_times.append(time.time() - starttime)
             if traj is not None:
+                trajectories.append(traj)
                 ros_traj = ru.planning.ros_trajectory_from_openrave(robot.GetName(), traj)
                 qarm = ros_traj.points[-1].positions
                 robot.SetActiveDOFValues(qarm)
+    import IPython
+    IPython.embed(banner1="")
     exit(0)
 
 
