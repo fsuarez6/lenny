@@ -57,8 +57,10 @@ if not bimanual.load_ikfast(freeinc=np.pi / 6.):
 num_cubes = len(cubes)
 scheduler = PDPScheduler(bimanual)
 print ("Seaching for reachable configurations...")
+starttime  = time.time()
 reachable_bins, reachable_cubes =scheduler.find_reachable_configurations(bins, cubes, freeinc=None)
 sequence = scheduler.generate_sequence_random(reachable_cubes.keys(), num_cubes)
+duration_step1 = time.time() - starttime
 if sequence is None:
     print("Failed to find a valid sequence to pickup the cubes")
     exit(0)
@@ -70,6 +72,7 @@ if args.viewer:
     eman.start_viewer(viewer_name)
 
 # # TODO: Move this section to a class
+starttime = time.time()
 print ("Solving the problem...")
 import networkx as nx
 import raveutils as ru
@@ -88,6 +91,7 @@ for cube_i, cube_j in sequence:
 setslist += [[qhome]]
 cgraph, sets = rtsp.construct.from_sorted_setslist(setslist, distfn=rtsp.metric.max_joint_diff_fn, args=(1./vmax,))
 ctour = nx.dijkstra_path(cgraph, source=0, target=cgraph.number_of_nodes()-1)
+duration_step2 = time.time() - starttime
 
 if args.ik:
     print("Showing the found robot configurations...")
@@ -140,6 +144,8 @@ for i, traj in enumerate(trajectories):
         for name in sequence[seq_index]:
             with env:
                 env.RemoveKinBodyByName(name)
+
+duration_step3 = sum(cpu_times)
 
 import IPython
 IPython.embed(banner1="")
