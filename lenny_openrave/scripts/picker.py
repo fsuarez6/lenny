@@ -22,6 +22,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Lenny RoboTSP bimanual")
     parser.add_argument("-s", "--seed", type=int, default=123, help="Seed for the random yaw of the cubes")
     parser.add_argument("-v", "--viewer", action="store_true", help="If set, will show the qtcoin viewer")
+    parser.add_argument("--ik", action="store_true", help="If set, will only show the found IK solutions")
     return parser.parse_args()
 
 args = parse_args()
@@ -56,7 +57,7 @@ if not bimanual.load_ikfast(freeinc=np.pi / 6.):
 num_cubes = len(cubes)
 scheduler = PDPScheduler(bimanual)
 print ("Seaching for reachable configurations...")
-reachable_bins, reachable_cubes =scheduler.find_reachable_configurations(bins, cubes, freeinc=np.pi)
+reachable_bins, reachable_cubes =scheduler.find_reachable_configurations(bins, cubes, freeinc=None)
 sequence = scheduler.generate_sequence_random(reachable_cubes.keys(), num_cubes)
 if sequence is None:
     print("Failed to find a valid sequence to pickup the cubes")
@@ -69,7 +70,7 @@ if args.viewer:
     eman.start_viewer(viewer_name)
 
 # # TODO: Move this section to a class
-# print ("Solving the problem...")
+print ("Solving the problem...")
 import networkx as nx
 import raveutils as ru
 # Robotsp from home, then to the cubes and finally back home again
@@ -87,6 +88,30 @@ for cube_i, cube_j in sequence:
 setslist += [[qhome]]
 cgraph, sets = rtsp.construct.from_sorted_setslist(setslist, distfn=rtsp.metric.max_joint_diff_fn, args=(1./vmax,))
 ctour = nx.dijkstra_path(cgraph, source=0, target=cgraph.number_of_nodes()-1)
+
+if args.ik:
+    print("Showing the found robot configurations...")
+    for idx in xrange(len(ctour)-1):
+        raw_input("Press any key to continue...")
+        u = ctour[idx]
+        v = ctour[idx+1]
+        qgoal = cgraph.node[v]["value"]
+        bimanual.update_active_joints()
+        with env:
+            robot.SetActiveDOFValues(qgoal)
+        twist = np.zeros(6)
+        twist[2] = -0.085
+        for manip in [bimanual.left_manip, bimanual.right_manip]:
+            robot.SetActiveManipulator(manip)
+            robot.SetActiveDOFs(manip.GetArmIndices())
+            traj = ru.planning.plan_cartesian_twist(robot, twist)
+            if traj is not None:
+                ros_traj = ru.planning.ros_trajectory_from_openrave(robot.GetName(), traj)
+                qarm = ros_traj.points[-1].positions
+                robot.SetActiveDOFValues(qarm)
+    exit(0)
+
+
 # Compute the trajectories
 cpu_times = []
 trajectories = []

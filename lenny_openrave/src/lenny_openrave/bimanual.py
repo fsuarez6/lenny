@@ -42,11 +42,6 @@ class BimanualPlanner(object):
                 anchor_joint = j
                 break
         return anchor_joint
-    
-    def _update_active_joints(self):
-        if self.torso_joint and self.right_manip and self.left_manip:
-            indices = np.hstack((self.torso_joint.GetDOFIndex(), self.left_indices, self.right_indices))
-            self.robot.SetActiveDOFs(indices)
 
     def estimate_torso_angle(self, left_point, right_point):
         Tchild = self.torso_joint.GetSecondAttached().GetTransform()
@@ -209,7 +204,7 @@ class BimanualPlanner(object):
             success = True
             self.left_indices = self.left_manip.GetArmIndices()
             self.left_anchor_joint = self._get_anchor_joint(self.left_manip)
-        self._update_active_joints()
+        self.update_active_joints()
         return success
 
     def set_right_manipulator(self, manip_name):
@@ -219,7 +214,7 @@ class BimanualPlanner(object):
             success = True
             self.right_indices = self.right_manip.GetArmIndices()
             self.right_anchor_joint = self._get_anchor_joint(self.right_manip)
-        self._update_active_joints()
+        self.update_active_joints()
         return success
 
     def set_torso_joint(self, joint_name):
@@ -227,10 +222,15 @@ class BimanualPlanner(object):
         if joint_name in self.joint_names:
             self.torso_joint = self.robot.GetJoint(joint_name)
             success = True
-        self._update_active_joints()
+        self.update_active_joints()
         return success
 
     def set_torso_joint_value(self, value):
         idx = self.torso_joint.GetDOFIndex()
         with self.env:
             self.robot.SetDOFValues([value], [idx])
+    
+    def update_active_joints(self):
+        if self.torso_joint and self.right_manip and self.left_manip:
+            indices = np.hstack((self.torso_joint.GetDOFIndex(), self.left_indices, self.right_indices))
+            self.robot.SetActiveDOFs(indices)
