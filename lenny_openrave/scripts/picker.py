@@ -3,10 +3,13 @@ import sys
 import time
 import random
 import argparse
+import itertools
 import numpy as np
 import baldor as br
+import raveutils as ru
 import robotsp as rtsp
 import openravepy as orpy
+from scipy.spatial import ConvexHull
 
 from lenny_openrave.manager import EnvironmentManager
 from lenny_openrave.scheduler import PDPScheduler
@@ -20,6 +23,7 @@ def parse_args():
     # Parse
     format_class = argparse.RawDescriptionHelpFormatter
     parser = argparse.ArgumentParser(description="Lenny RoboTSP bimanual")
+    parser.add_argument("-r", "--reachability", action="store_true", help="If set, will only show reachability")
     parser.add_argument("-s", "--seed", type=int, default=123, help="Seed for the random yaw of the cubes")
     parser.add_argument("-v", "--viewer", action="store_true", help="If set, will show the qtcoin viewer")
     parser.add_argument("--ik", action="store_true", help="If set, will only show the found IK solutions")
@@ -38,7 +42,6 @@ robot = env.GetRobot("robot")
 robot.SetDOFValues(np.zeros(robot.GetDOF()))
 
 # Environment manager
-# Good seeds:: [27 = 10, 38 = 8]
 eman = EnvironmentManager(env, num_cubes=8, seed=args.seed)
 cubes = eman.get_cubes()
 bins = eman.get_bins()
@@ -52,6 +55,56 @@ if not bimanual.load_ikfast(freeinc=np.pi / 6.):
     print("Failed to load IKFast. Run the generate_robot_databases.sh script.")
     exit(0)
 
+# Start and configure the viewer
+if args.viewer:
+    viewer_name = "qtcoin"
+    print("Starting viewer: {0}".format(viewer_name))
+    eman.start_viewer(viewer_name)
+
+if args.reachability:
+    # Reachability. One arm is enough due to symmetry
+    print ("Computing reachable workspace...")
+    indices = np.zeros(3)
+    indices[1:] = bimanual.left_indices[:2]
+    manip = bimanual.left_manip
+    Toffset = np.eye(4)
+    Toffset[:3,3] = [0., 0., -0.07]
+    angles_list = []
+    num_points = 1
+    for qmin, qmax in zip(robot.GetDOFLimits(indices)[0], robot.GetDOFLimits(indices)[1]):
+        angles_list.append(np.arange(qmin, qmax, np.deg2rad(15)))
+        num_points = num_points * len(angles_list[-1])
+    points = np.zeros((num_points, 3))
+    idx = 0
+    for angles in itertools.product(*angles_list):
+        with robot:
+            robot.SetDOFValues(angles, indices)
+            T = np.dot(manip.GetEndEffectorTransform(), Toffset)
+        points[idx] = T[:3,3]
+        idx += 1
+    vertices, faces = ru.mesh.trimesh_from_point_cloud(points)
+    orange = np.array([ 1. ,0.54902,  0., 0.25])
+    ocd = False
+    if ocd:
+        # Dependencies: $ pip install --user trimesh && sudo apt-get install openscad
+        import trimesh
+        # Remove the env bodies from the reachable mesh
+        reachable = trimesh.Trimesh(vertices=vertices, faces=faces)
+        for body in env.GetBodies():
+            if body.IsRobot():
+                continue
+            corners = ru.body.get_bounding_box_corners(body)
+            vertices, faces = ru.mesh.trimesh_from_point_cloud(corners)
+            mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
+            reachable = reachable.difference(mesh, 'scad')
+        
+        h = env.drawtrimesh(reachable.vertices, indices=reachable.faces, colors=orange)
+    else:
+        h = env.drawtrimesh(vertices, indices=faces, colors=orange)
+    # Debug?
+    import IPython
+    IPython.embed(banner1="")
+    exit(0)
 
 # PDP Scheduler
 num_cubes = len(cubes)
@@ -64,12 +117,6 @@ duration_step1 = time.time() - starttime
 if sequence is None:
     print("Failed to find a valid sequence to pickup the cubes")
     exit(0)
-
-# Start and configure the viewer
-if args.viewer:
-    viewer_name = "qtcoin"
-    print("Starting viewer: {0}".format(viewer_name))
-    eman.start_viewer(viewer_name)
 
 # # TODO: Move this section to a class
 starttime = time.time()

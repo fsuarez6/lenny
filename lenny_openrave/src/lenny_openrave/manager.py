@@ -97,5 +97,5 @@ class EnvironmentManager(object):
         if Tcamera is None:
             rpy = np.deg2rad([235., 0., 110.])
             Tcamera = br.euler.to_transform(*rpy)
-            Tcamera[:3,3] = [2.3, 1., 2.1]
+            Tcamera[:3,3] = [2.336, 0.83, 2.13]
         viewer.SetCamera(Tcamera)
